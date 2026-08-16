@@ -1,0 +1,66 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@deepseek-ai/cordis": [
+        "../../../vendor/cordis/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/schemastery": [
+        "../../../vendor/schemastery/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-agent": [
+        "../../../packages/core/agent/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-fs": [
+        "../../../packages/fs/fs/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-fs-local": [
+        "../../../packages/fs/fs-local/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm": [
+        "../../../packages/llm/llm/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-session": [
+        "../../../packages/core/session/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-session/types": [
+        "../../../packages/core/session/lib/types/types.d.ts"
+      ],
+      "@deepseek-ai/dsh-storage": [
+        "../../../packages/storage/storage/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-storage-domain": [
+        "../../../packages/storage/storage-domain/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-subprocess": [
+        "../../../packages/subprocess/subprocess/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-subprocess-local": [
+        "../../../packages/subprocess/subprocess-local/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-system-prompt": [
+        "../../../packages/core/system-prompt/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-tools": [
+        "../../../packages/core/tools/lib/types/index.d.ts"
+      ]
+    }
+  },
+  "include": ["src", "tests", "tsdown.config.ts", "vitest.config.ts"]
+}

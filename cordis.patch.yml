@@ -1,0 +1,79 @@
+# dsh-library bundle patch: mount the local knowledge-base plugin.
+#
+# Every key below is a Config field (Schemastery schema); invalid values fail
+# the profile load loudly. See README.md "Configuration" for the full table.
+- insert:
+    - id: dsh-library
+      name: dsh-library
+      config:
+        # Sliding-window chunk size in characters (chunks are the retrieval
+        # unit). Must not exceed 4000.
+        chunkSize: 900
+        # Sliding-window overlap in characters; must be smaller than
+        # chunkSize so consecutive windows share context.
+        chunkOverlap: 120
+        # Files larger than this (UTF-8 bytes) are rejected on library_add.
+        maxFileBytes: 5242880
+        embedding:
+          # Hash-embedding dimensionality (built-in embedder; >= 8). Larger
+          # values trade memory for fewer bucket collisions.
+          dims: 256
+          # Optional external embedder command (space-separated argv, NO shell
+          # interpretation) executed through ctx.subprocess: reads one
+          # {"index":n,"text":"..."} JSON object per stdin line and writes one
+          # {"index":n,"vector":[...]} JSON object per stdout line. Leave
+          # unset for the built-in deterministic hash embedder (zero downloads).
+          command: ''
+          # Cooperative timeout for one embedder invocation (ms).
+          timeoutMs: 30000
+          # Terminate-escalation grace handed to the subprocess seam (ms).
+          graceMs: 1000
+          # Max bytes of one embedder stdout before the batch fails.
+          maxOutputBytes: 1048576
+          # Max texts embedded per subprocess invocation; larger batches split.
+          maxBatchItems: 64
+        search:
+          # How many chunks one search returns after the full pipeline.
+          topK: 8
+          # Hybrid weight: 0 = keyword-only, 1 = semantic-only.
+          hybridWeight: 0.6
+          # Chunks scoring below this relevance threshold are filtered out.
+          minRelevance: 0.15
+          # Diversity re-rank weight: 1 = pure relevance, 0 = pure diversity.
+          diversityLambda: 0.5
+          # Strongest chunks pinned to the head of the context
+          # (lost-in-the-middle avoidance).
+          lostMiddleHead: 1
+          # Next-strongest chunks pinned to the tail of the context.
+          lostMiddleTail: 1
+          # Character budget for the model-facing result page.
+          maxResultChars: 16000
+        injection:
+          # Whether library_search with inject: true injects into the calling
+          # agent (the injected text carries [n] source markers).
+          enabled: true
+          # Character budget of one injected context message.
+          maxChars: 12000
+        citation:
+          # Context window (chars) around each citation marker that forms the
+          # claim in library_cite_check.
+          windowChars: 150
+          # Minimum fuzzy token-match score (0-100) for a citation to be valid.
+          minScore: 40
+          # Minimum semantic similarity (0-1) for a citation to be valid.
+          minSemantic: 0.1
+        purge:
+          # Token n-gram width of the removed-content signatures scanned for
+          # residue after library_remove.
+          signatureLength: 4
+          # How many signatures are probed per removal; longer documents
+          # sample deterministically.
+          maxProbes: 24
+        diagnose:
+          # Cap on reported near-duplicate chunk pairs in library_diagnose.
+          maxDuplicatePairs: 24
+          # Chunks sampled into the duplicate scan (the pair check is
+          # quadratic).
+          sampleCap: 200
+          # How many position bins the lost-in-the-middle report uses.
+          positionBins: 5
