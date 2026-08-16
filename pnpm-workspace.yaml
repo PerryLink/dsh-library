@@ -4,3 +4,14 @@
 # deepseek-harness checkout.
 packages:
   - .
+
+# pnpm 11 runs installs with dependency build scripts ignored by default
+# (ERR_PNPM_IGNORED_BUILDS); the builds below are required for this package
+# (esbuild: tsdown bundling; node-pty + dsh-subprocess-local + koffi: the
+# real-seam test stack). pnpm's isolated prepare env for git-hosted installs
+# also reads this file, so the git channel stays installable.
+allowBuilds:
+  esbuild: true
+  node-pty: true
+  koffi: true
+  '@deepseek-ai/dsh-subprocess-local': true
