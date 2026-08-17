@@ -1,6 +1,6 @@
-﻿{
+{
   "name": "dsh-library",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local document knowledge base for DeepSeek Harness: library_add/remove/list, hybrid semantic+keyword library_search with diversity re-ranking, relevance filtering and lost-in-the-middle avoidance, citation-aware injection, library_cite_check and library_diagnose 鈥?SQLite-backed index via the storage domain, local embedding, zero model downloads",
   "repository": {
     "type": "git",
