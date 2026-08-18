@@ -16,3 +16,10 @@ function run(command, args) {
 
 run('tsdown', [])
 run('tsc', ['-p', 'tsconfig.build.json'])
+// TS 5.9 does not rewrite `.ts` specifiers in declaration emit; fix them so
+// NodeNext declaration consumers can resolve lib/types. `execFileSync` without
+// a shell so the space in process.execPath does not break under cmd.exe.
+execFileSync(process.execPath, [resolve(import.meta.dirname, 'fix-dts.mjs')], {
+  cwd: root,
+  stdio: 'inherit',
+})

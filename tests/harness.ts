@@ -9,7 +9,7 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
+import { Context, type Fiber } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import CommandRuntime from '@deepseek-ai/dsh-commands'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
@@ -27,6 +27,8 @@ export interface Harness {
   readonly session: Session
   readonly agent: Agent
   readonly sandbox: string
+  /** The fiber this plugin was mounted under; dispose it to prove HMR safety. */
+  readonly pluginFiber: Fiber
 }
 
 let harnessCounter = 0
@@ -68,10 +70,10 @@ export async function mountHarness(config: Record<string, unknown> = {}): Promis
   await ctx.plugin(ToolRuntime)
 
   const plugin = await import('../src/index.ts')
-  await ctx.plugin(plugin as unknown as import('@deepseek-ai/cordis').Plugin, config)
+  const pluginFiber = await ctx.plugin(plugin as unknown as import('@deepseek-ai/cordis').Plugin, config)
 
   const agent = makeAgent(session)
-  return { ctx, session, agent, sandbox }
+  return { ctx, session, agent, sandbox, pluginFiber }
 }
 
 /** Dispose a harness and remove its sandbox (its own mkdtemp dir only). */
