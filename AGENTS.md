@@ -24,7 +24,7 @@ Standalone DeepSeek Harness plugin repository (`dsh-library`). Development follo
 
 `pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build && pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm pack`
 
-- `typecheck` resolves `@deepseek-ai/*` through tsconfig paths to the local harness checkout; `typecheck:ci` clears the paths and checks against the published `0.1.0-rc.6` types. Both must stay green.
+- `typecheck` resolves `@deepseek-ai/*` through tsconfig paths to the local harness checkout; `typecheck:ci` clears the paths and checks against the published `0.1.0-rc.8` types. Both must stay green.
 - Tests run against the REAL stack: storage hub + JSON backend + storage domain, real `ToolRuntime`/`Commands`/`Session`, and a real local filesystem over a per-test mkdtemp sandbox.
 
 ## Docs

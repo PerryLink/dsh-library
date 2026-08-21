@@ -24,7 +24,7 @@
 
 | Superficie | Estado |
 |---|---|
-| Harness | DeepSeek Harness `0.1.0-rc.6` (compatibilidad declarada para `0.1.0-rc.5`–`0.1.0-rc.6`) |
+| Harness | DeepSeek Harness `0.1.0-rc.8` (compatibilidad declarada para `0.1.0-rc.8`) |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Almacenamiento | Cualquier backend de storage-domain (JSON o SQLite); el índice vive en el dominio de almacenamiento del host |
 | Modelos | Ninguno requerido — el embedder integrado es hash determinista (cero descargas) |
@@ -137,7 +137,7 @@ Todos los ajustes son campos `Config` de Schemastery (modificables desde cordis.
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests contra el checkout local del harness
-pnpm run typecheck:ci  # tsc contra los tipos publicados 0.1.0-rc.6 (sin paths)
+pnpm run typecheck:ci  # tsc contra los tipos publicados 0.1.0-rc.8 (sin paths)
 pnpm test           # vitest: puertos de calidad, vocabulario núcleo, ensamblaje con pila real
 pnpm run build      # bundle tsdown + declaraciones tsc (lib/)
 pnpm run verify:self-contained  # las especificaciones de dependencias resuelven desde el registry
