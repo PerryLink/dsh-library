@@ -145,7 +145,7 @@ describe('/library command', () => {
     const harness = await mountHarness()
     try {
       await addSample(harness, 'docs', 'a.txt', DOC_A)
-      const outcome = await harness.ctx.commands.execute(harness.agent, '/library docs', new AbortController().signal)
+      const outcome = await harness.ctx.commands.execute(harness.agent, '/library docs', [], new AbortController().signal)
       const result = outcome?.result as { kind: string; text?: string }
       expect(result?.kind).toBe('success')
       expect(result?.text).toContain('docs: 1 document(s)')

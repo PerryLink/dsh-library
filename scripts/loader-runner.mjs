@@ -80,7 +80,7 @@ try {
   }
 
   // Real behavior: the /library command through the real commands service.
-  const execution = await ctx.commands.execute(agent, '/library', new AbortController().signal)
+  const execution = await ctx.commands.execute(agent, '/library', [], new AbortController().signal)
   const text = execution?.result?.text ?? ''
   if (!text.includes('No documents indexed yet')) {
     throw new Error(`Loader composition: /library returned ${JSON.stringify(execution?.result)}`)
