@@ -24,7 +24,7 @@
 
 | 方面 | 状态 |
 |---|---|
-| Harness | DeepSeek Harness `0.1.0-rc.8`（声明兼容 `0.1.0-rc.8`） |
+| Harness | DeepSeek Harness `0.1.1-rc.2`（声明兼容 `0.1.1-rc.2`） |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | 存储 | 任意 storage-domain 后端（JSON 或 SQLite）；索引存放在宿主的存储域中 |
 | 模型 | 无需任何模型 —— 内置嵌入为确定性哈希（零下载） |
@@ -137,7 +137,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc：src + tests 对照本地 harness checkout
-pnpm run typecheck:ci  # tsc：对照已发布的 0.1.0-rc.8 类型（无 paths）
+pnpm run typecheck:ci  # tsc：对照已发布的 0.1.1-rc.2 类型（无 paths）
 pnpm test           # vitest：八移植回归、核心词汇、真实栈装配
 pnpm run build      # tsdown bundle + tsc 声明（lib/）
 pnpm run verify:self-contained  # 依赖声明全部来自 registry
