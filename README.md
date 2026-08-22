@@ -1,6 +1,7 @@
 <div align="center">
 
 # 📚 dsh-library
+[![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/dsh-library)
 
 **Local document knowledge base for DeepSeek Harness.**
 
