@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest an improvement for dsh-library
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Tell us what problem you are trying to solve and what you would like to see.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: A clear description of the problem or need this feature addresses.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Expected behavior
+      description: What you would like the feature to do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative approaches you have already considered.
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other context, references, or screenshots that help.
+    validations:
+      required: false
