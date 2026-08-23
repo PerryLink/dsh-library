@@ -42,4 +42,16 @@ describe('cordis.patch.yml manifest consistency', () => {
       expect(names, `patch must insert ${storage}`).toContain(storage)
     }
   })
+
+  it('declares a peer dependency for every hard-injected service provider', () => {
+    // src/index.ts injects storageDomain, tools, and commands; a hard inject
+    // must have its provider package in peerDependencies, not only dev.
+    for (const provider of [
+      '@deepseek-ai/dsh-storage-domain',
+      '@deepseek-ai/dsh-tools',
+      '@deepseek-ai/dsh-commands',
+    ]) {
+      expect(pkg.peerDependencies, `missing peer ${provider}`).toHaveProperty(provider)
+    }
+  })
 })
