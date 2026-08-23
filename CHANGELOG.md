@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Declared `@deepseek-ai/dsh-commands` as a peer dependency: the `/library` command hard-injects the `commands` service, so its provider package must be declared alongside `@deepseek-ai/dsh-tools` and `@deepseek-ai/dsh-storage-domain` instead of being a dev-only dependency.
+
 ## [0.1.3] - 2026-08-22
 
 ### Changed
