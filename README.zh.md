@@ -88,7 +88,9 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 | `chunkOverlap` | `120` | 相邻窗口重叠；必须小于 `chunkSize` |
 | `maxFileBytes` | `5242880` | 超过该大小的文件在 `library_add` 被拒绝 |
 | `embedding.dims` | `256` | 哈希嵌入维度（≥ 8） |
-| `embedding.command` | `''` | 可选外部嵌入命令（空格分隔 argv、无 shell）走 `ctx.subprocess`；`''` = 内置哈希嵌入 |
+| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程，需 `embedding.command`）、`ollama`（本地 Ollama，探测不可用时降级回 `hash`） |
+| `embedding.command` | `''` | 可选外部嵌入命令（空格分隔 argv、无 shell）走 `ctx.subprocess`；设置后即选择 `command` 后端 |
+| `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | `ollama` 后端的本地 Ollama 端点与模型（零云端） |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | 嵌入子进程预算 |
 | `search.topK` | `8` | 完整管线后返回的结果数 |
 | `search.hybridWeight` | `0.6` | 0 = 仅关键词，1 = 仅语义 |
@@ -128,7 +130,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 
 ## 已知限制
 
-- **词法级嵌入。** 内置哈希嵌入打分的是表面相似而非语义；对改写表达的检索质量低于真实嵌入模型 —— 配置 `embedding.command` 可获得更强语义。
+- **词法级嵌入。** 内置哈希嵌入打分的是表面相似而非语义；对改写表达的检索质量低于真实嵌入模型 —— 配置 `embedding.command`（任意子进程嵌入）或 `embedding.provider: ollama`（本地 Ollama 嵌入模型）可获得更强语义。
 - **本地引用模型。** `library_cite_check` 针对搜索结果页（`[n]` 编号）验证，不支持自由形式的来源名；模糊分数是有界的词序列部分匹配率。
 - **无摄取管线。** 文档须按路径导入（`md`/`txt`）；PDF/docx 抽取不在 v0.1.0 范围。
 

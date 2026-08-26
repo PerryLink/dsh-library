@@ -88,7 +88,9 @@ Todos os ajustes são campos `Config` do Schemastery (alteráveis pelo cordis.ym
 | `chunkOverlap` | `120` | Sobreposição entre janelas; deve ser menor que `chunkSize` |
 | `maxFileBytes` | `5242880` | Arquivos maiores são rejeitados no `library_add` |
 | `embedding.dims` | `256` | Dimensionalidade do hash embedding (≥ 8) |
-| `embedding.command` | `''` | Comando de embedder externo opcional (argv separado por espaços, sem shell) via `ctx.subprocess`; `''` = embedder hash integrado |
+| `embedding.provider` | `hash` | Backend do embedder: `hash` (integrado, zero downloads), `command` (subprocesso externo, requer `embedding.command`), `ollama` (Ollama local, sondado e degradado para `hash` se inalcançável) |
+| `embedding.command` | `''` | Comando de embedder externo opcional (argv separado por espaços, sem shell) via `ctx.subprocess`; configurá-lo seleciona o backend `command` |
+| `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | Endpoint e modelo do Ollama local para o backend `ollama` (zero nuvem) |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | Orçamento do subprocesso do embedder |
 | `search.topK` | `8` | Resultados devolvidos após o pipeline completo |
 | `search.hybridWeight` | `0.6` | 0 = só palavras-chave, 1 = só semântica |

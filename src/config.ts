@@ -20,6 +20,10 @@ export const DEFAULT_MAX_FILE_BYTES = 5 * 1024 * 1024
 export const MAX_CHUNK_CHARS = 4000
 /** Hash-embedding dimensionality used by the zero-download local embedder. */
 export const DEFAULT_EMBEDDING_DIMS = 256
+/** Local Ollama base URL (zero cloud — only this localhost endpoint is ever contacted). */
+export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434'
+/** Default Ollama embedding model. */
+export const DEFAULT_OLLAMA_MODEL = 'nomic-embed-text'
 /** Embedder subprocess budget. */
 export const DEFAULT_EMBEDDING_TIMEOUT_MS = 30_000
 export const DEFAULT_EMBEDDING_GRACE_MS = 1000
@@ -48,10 +52,17 @@ export const DEFAULT_DIAGNOSE_MAX_DUPLICATE_PAIRS = 24
 export const DEFAULT_DIAGNOSE_SAMPLE_CAP = 200
 export const DEFAULT_DIAGNOSE_POSITION_BINS = 5
 
-/** Embedder selection: built-in hash embedding, or an external command through `ctx.subprocess`. */
+/** Embedder selection: built-in hash embedding, an external command, or a local Ollama server. */
 export interface EmbeddingConfig {
   /** Hash-embedding dimensionality (built-in embedder only). Must be ≥ 8. */
   dims?: number
+  /**
+   * Which embedder backend to use: `hash` (built-in, zero downloads), `command`
+   * (the external subprocess protocol, requires `command`), or `ollama` (a
+   * local Ollama server, probed and degraded to `hash` when unavailable).
+   * When `command` is set, the command provider wins regardless of this field.
+   */
+  provider?: 'hash' | 'command' | 'ollama'
   /**
    * Optional external embedder command line (space-separated, no shell
    * interpretation; executed through `ctx.subprocess`). The command must read
@@ -62,6 +73,10 @@ export interface EmbeddingConfig {
    * embedder runs with zero downloads.
    */
   command?: string
+  /** Local Ollama base URL for the `ollama` provider (default `http://127.0.0.1:11434`). */
+  ollamaUrl?: string
+  /** Ollama embedding model name (default `nomic-embed-text`). */
+  ollamaModel?: string
   /** Cooperative timeout for one embedder invocation (ms). */
   timeoutMs?: number
   /** Terminate-escalation grace handed to the subprocess seam (ms). */
@@ -154,7 +169,10 @@ export interface Config {
 /** Resolved embedding config: defaults applied, `command` explicitly optional. */
 export interface ResolvedEmbeddingConfig {
   readonly dims: number
+  readonly provider: 'hash' | 'command' | 'ollama'
   readonly command: string | undefined
+  readonly ollamaUrl: string
+  readonly ollamaModel: string
   readonly timeoutMs: number
   readonly graceMs: number
   readonly maxOutputBytes: number
@@ -218,14 +236,20 @@ export const Config: z<Config> = z.object({
   maxFileBytes: z.number().default(DEFAULT_MAX_FILE_BYTES),
   embedding: z.object({
     dims: z.number().default(DEFAULT_EMBEDDING_DIMS),
+    provider: z.union([z.const('hash'), z.const('command'), z.const('ollama')]).default('hash'),
     command: z.string(),
+    ollamaUrl: z.string().default(DEFAULT_OLLAMA_URL),
+    ollamaModel: z.string().default(DEFAULT_OLLAMA_MODEL),
     timeoutMs: z.number().default(DEFAULT_EMBEDDING_TIMEOUT_MS),
     graceMs: z.number().default(DEFAULT_EMBEDDING_GRACE_MS),
     maxOutputBytes: z.number().default(DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES),
     maxBatchItems: z.number().default(DEFAULT_EMBEDDING_MAX_BATCH),
   }).default({
     dims: DEFAULT_EMBEDDING_DIMS,
+    provider: 'hash',
     command: '',
+    ollamaUrl: DEFAULT_OLLAMA_URL,
+    ollamaModel: DEFAULT_OLLAMA_MODEL,
     timeoutMs: DEFAULT_EMBEDDING_TIMEOUT_MS,
     graceMs: DEFAULT_EMBEDDING_GRACE_MS,
     maxOutputBytes: DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES,
@@ -325,11 +349,25 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     assertPositiveInteger(name, value)
   }
   const rawCommand = embedding.command
-  const command = rawCommand === undefined || rawCommand.trim().length === 0 ? undefined : rawCommand
+  const command = rawCommand === undefined || rawCommand.trim().length === 0 ? undefined : rawCommand.trim()
+  const rawProvider = embedding.provider
+  let provider: 'hash' | 'command' | 'ollama'
   if (command !== undefined) {
-    if (command.split(/\s+/u)[0]!.length === 0) {
-      throw new TypeError('dsh-library: embedding.command must start with an executable (space-separated argv, no shell interpretation)')
-    }
+    provider = 'command' // an explicit command wins over any provider spelling
+  } else if (rawProvider === undefined || rawProvider === 'hash') {
+    provider = 'hash'
+  } else if (rawProvider === 'command') {
+    throw new TypeError('dsh-library: embedding.provider=command requires embedding.command to be set')
+  } else if (rawProvider === 'ollama') {
+    provider = 'ollama'
+  } else {
+    throw new TypeError(`dsh-library: embedding.provider must be hash|command|ollama, got ${JSON.stringify(rawProvider)}`)
+  }
+  const ollamaUrl = (embedding.ollamaUrl ?? DEFAULT_OLLAMA_URL).trim()
+  const ollamaModel = (embedding.ollamaModel ?? DEFAULT_OLLAMA_MODEL).trim()
+  if (provider === 'ollama') {
+    if (ollamaUrl.length === 0) throw new TypeError('dsh-library: embedding.ollamaUrl must be a non-empty URL when provider=ollama')
+    if (ollamaModel.length === 0) throw new TypeError('dsh-library: embedding.ollamaModel must be a non-empty model name when provider=ollama')
   }
   const search = config.search ?? {}
   const topK = search.topK ?? DEFAULT_SEARCH_TOPK
@@ -389,7 +427,10 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     maxFileBytes: config.maxFileBytes ?? DEFAULT_MAX_FILE_BYTES,
     embedding: {
       dims,
+      provider,
       command: command === undefined ? undefined : command.trim(),
+      ollamaUrl,
+      ollamaModel,
       timeoutMs: embedding.timeoutMs ?? DEFAULT_EMBEDDING_TIMEOUT_MS,
       graceMs: embedding.graceMs ?? DEFAULT_EMBEDDING_GRACE_MS,
       maxOutputBytes: embedding.maxOutputBytes ?? DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES,

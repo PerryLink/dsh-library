@@ -23,7 +23,7 @@ import type { SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { ToolRunContext } from '@deepseek-ai/dsh-tools'
 import { Config, resolveConfig, LIBRARY_NAME, type ResolvedConfig } from './config.ts'
-import { cosine, embedHash, embedWithCommand, splitCommandLine } from './embedding.ts'
+import { cosine, resolveEmbedder, type Embedder } from './embedding.ts'
 import { chunkIdOf, chunkKey, documentIdOf, documentKey, injectId, purgeId } from './ids.ts'
 import { chunkSizeHistogram, chunkText, findDuplicateChunks, type Chunk } from './quality/chunk-visual.ts'
 import { maximalMarginalRelevance } from './quality/diversity.ts'
@@ -40,7 +40,8 @@ export const inject = ['storageDomain', 'tools', 'commands']
 
 export { Config, resolveConfig, LIBRARY_NAME } from './config.ts'
 export type { ResolvedConfig, EmbeddingConfig, SearchConfig, InjectionConfig, CitationConfig, PurgeConfig, DiagnoseConfig } from './config.ts'
-export { embedHash, cosine, splitCommandLine } from './embedding.ts'
+export { embedHash, cosine, splitCommandLine, HashEmbedder, CommandEmbedder, OllamaEmbedder, probeOllama, resolveEmbedder } from './embedding.ts'
+export type { Embedder, EmbedderResolution } from './embedding.ts'
 export { CHUNK_SIZE_BUCKETS, chunkSizeHistogram, chunkText, chunkHash, findDuplicateChunks } from './quality/chunk-visual.ts'
 export type { Chunk, ChunkSizeHistogram, ChunkDiagnostics } from './quality/chunk-visual.ts'
 export { checkDiversity, maximalMarginalRelevance } from './quality/diversity.ts'
@@ -125,9 +126,9 @@ declare module '@deepseek-ai/dsh-session/types' {
   }
 }
 
-/** Optional seams read at call time (fail closed when absent). */
+/** Optional seams resolved at call time; the embedder is resolved at mount (fail closed when absent). */
 interface StoreDeps {
-  readonly subprocess: SubprocessRuntime | undefined
+  readonly embedder: Embedder
 }
 
 /** One `library_add` outcome. */
@@ -258,25 +259,9 @@ export class LibraryStore {
     this.purges = domain.table('purges')
   }
 
-  /** Embed a text batch with the configured embedder (external command when set). */
+  /** Embed a text batch with the resolved embedder backend. */
   private async embed(texts: readonly string[]): Promise<number[][]> {
-    const command = this.config.embedding.command
-    if (command === undefined) return texts.map(text => embedHash(text, this.config.embedding.dims))
-    if (this.deps.subprocess === undefined) {
-      throw new Error('embedding.command is configured but ctx.subprocess is not mounted — the external embedder cannot run')
-    }
-    return embedWithCommand(
-      this.deps.subprocess,
-      splitCommandLine(command),
-      process.cwd(),
-      texts,
-      this.config.embedding.dims,
-      {
-        timeoutMs: this.config.embedding.timeoutMs,
-        graceMs: this.config.embedding.graceMs,
-        maxOutputBytes: this.config.embedding.maxOutputBytes,
-      },
-    )
+    return this.deps.embedder.embed(texts)
   }
 
   /**
@@ -522,11 +507,14 @@ export class LibraryStore {
   }
 }
 
-/** Optional services resolved at call time (fail closed). */
-function storeDepsOf(ctx: Context): StoreDeps {
-  return {
-    subprocess: ctx.get('subprocess') as SubprocessRuntime | undefined,
+/** Resolve the embedder backend at mount; a degraded Ollama falls back to hash with a logged reason. */
+async function storeDepsOf(ctx: Context, config: ResolvedConfig): Promise<StoreDeps> {
+  const subprocess = ctx.get('subprocess') as SubprocessRuntime | undefined
+  const resolution = await resolveEmbedder(config.embedding, subprocess, process.cwd())
+  if (resolution.degraded) {
+    ctx.logger('dsh-library').warn(`embedder: ${resolution.reason}`)
   }
+  return { embedder: resolution.embedder }
 }
 
 /** The store service shared by every tool and the command. */
@@ -558,7 +546,7 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
   const resolved = resolveConfig(config)
   const domain = await ctx.storageDomain.open(libraryDomainSpec)
   ctx.effect(() => () => domain.close(), 'dsh-library: storage domain')
-  const store = new LibraryStore(domain, resolved, storeDepsOf(ctx))
+  const store = new LibraryStore(domain, resolved, await storeDepsOf(ctx, resolved))
   const services: LibraryServices = { ctx, config: resolved, store }
 
   for (const tool of allTools(services)) {

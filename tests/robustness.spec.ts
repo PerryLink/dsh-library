@@ -45,16 +45,7 @@ describe('fail closed', () => {
     }
   })
 
-  it('fails the add when an external embedder is configured but the seam is absent', async () => {
-    const harness = await mountHarness({ embedding: { command: 'fake-embedder' } })
-    try {
-      const filePath = path.join(harness.sandbox, 'a.txt')
-      writeFileSync(filePath, 'a document body', 'utf8')
-      const result = await callTool(harness, 'library_add', { path: filePath, library: 'docs' })
-      expect(result.isError).toBe(true)
-      if (result.isError) expect(result.error.message).toContain('ctx.subprocess is not mounted')
-    } finally {
-      await unmountHarness(harness)
-    }
+  it('fails at mount when an external embedder command is configured but the seam is absent', async () => {
+    await expect(mountHarness({ embedding: { command: 'fake-embedder' } })).rejects.toThrow(/ctx.subprocess is not mounted/u)
   })
 })

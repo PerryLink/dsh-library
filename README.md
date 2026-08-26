@@ -89,7 +89,9 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 | `chunkOverlap` | `120` | Overlap between consecutive windows; must be smaller than `chunkSize` |
 | `maxFileBytes` | `5242880` | Files larger than this are rejected on `library_add` |
 | `embedding.dims` | `256` | Hash-embedding dimensionality (≥ 8) |
-| `embedding.command` | `''` | Optional external embedder command (space-separated argv, no shell) over `ctx.subprocess`; `''` = built-in hash embedder |
+| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in, zero downloads), `command` (external subprocess, requires `embedding.command`), or `ollama` (local Ollama, probed and degraded to `hash` when unreachable) |
+| `embedding.command` | `''` | Optional external embedder command (space-separated argv, no shell) over `ctx.subprocess`; setting it selects the `command` provider |
+| `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | Local Ollama endpoint + model for the `ollama` provider (zero cloud) |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | Embedder subprocess budget |
 | `search.topK` | `8` | Results returned after the full pipeline |
 | `search.hybridWeight` | `0.6` | 0 = keyword-only, 1 = semantic-only |
@@ -129,7 +131,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 
 ## Known limitations
 
-- **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` for stronger semantics.
+- **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` (any subprocess embedder) or `embedding.provider: ollama` (a local Ollama embedding model) for stronger semantics.
 - **Local citation model.** `library_cite_check` validates against the search result page (the `[n]` numbering), not against free-form source names; the fuzzy score is a bounded token-sequence partial ratio.
 - **No ingestion pipeline.** Documents must be imported by path (`md`/`txt`); PDF/docx extraction is out of scope for v0.1.0.
 
