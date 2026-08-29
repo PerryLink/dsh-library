@@ -1,6 +1,7 @@
 <div align="center">
 
 # 📚 dsh-library
+- **Canal 1024 store**: `npm i -g dsh1024` una vez, luego `dsh1024 plugin --profile web add dsh-library` (cuenta para el ranking de instalaciones de [deepseek1024.com](https://deepseek1024.com)).
 
 **Base de conocimiento local de documentos para DeepSeek Harness.**
 
