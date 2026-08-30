@@ -35,7 +35,7 @@
 `dsh-library` 把本地 md/txt 文档变成可查询的知识库，并带一套 agent 可信任的质量管线：
 
 - **`library_add` / `library_remove` / `library_list`** —— 按路径导入文档（分块 + 嵌入）、删除文档并做**清除验证**（用被删内容的签名探测剩余索引，残留即报告）、列出文档元数据。
-- **`library_search`** —— 语义 + 关键词混合排序、最大边际相关多样性重排、相关性过滤与**中段丢失规避**（最强切片钉在首尾）。`inject: true` 时结果页注入调用 agent；每条命中带 `[n]` 来源标记，注入可从 `library/inject` 会话事件重建。
+- **`library_search`** —— 语义 + 关键词混合排序、最大边际相关多样性重排、相关性过滤与**中段丢失规避**（最强切片钉在首尾）。`inject: true` 时结果页注入调用 agent；每条命中带 `[n]` 来源标记，注入可从 `library/inject` 会话事件重建（受宿主门控，见「权限与数据」）。
 - **`library_cite_check`** —— 用模糊词面匹配 + 语义相似度双重校验答案中的 `[n]` 引用。
 - **`library_diagnose`** —— 切片大小直方图、近似重复切片对、自检索探针与中段惩罚信号。
 - **`/library`** —— 每个知识库一行索引摘要。
@@ -48,7 +48,7 @@
 查询 ── library_search ─▶ 混合打分 ─▶ MMR 重排 ─▶ 相关性过滤
                               │                ─▶ 中段规避排序
                               ▼
-                带 [n] 标记的结果页 ── inject: true ─▶ agent + library/inject 事件
+                带 [n] 标记的结果页 ── inject: true ─▶ agent + library/inject 事件（受宿主门控）
 ```
 
 ## 快速开始
@@ -120,7 +120,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 
 - **权限**：插件只读取你让 `library_add` 指向的文件（经 harness 文件系统服务及其策略），并只写入自己的 `dsh_library` 存储域。无网络请求；可选外部嵌入命令经 `ctx.subprocess` 执行、无 shell 解释。
 - **数据**：切片文本与嵌入存放在宿主的存储后端（与部署的其他持久数据同级信任）；插件不额外加密。文档路径与嵌入向量绝不进入会话日志。
-- **会话日志**：`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志审计事件 —— 模型可见的注入页可从中重建。
+- **会话日志**：`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志审计事件 —— 模型可见的注入页可从中重建。写入受宿主门控：已知类型集合覆盖该词汇的宿主直接写入；带 `ignorable` 信封的构建加标记写入；无信封构建（0.1.1-rc.2、0.1.2-alpha.1）跳过写入 —— 此时已记录的 `tool/call` + `tool/result` 事件仍是可重建的审计链。
 
 ## 安全边界
 
@@ -134,6 +134,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 - **词法级嵌入。** 内置哈希嵌入打分的是表面相似而非语义；对改写表达的检索质量低于真实嵌入模型 —— 配置 `embedding.command`（任意子进程嵌入）或 `embedding.provider: ollama`（本地 Ollama 嵌入模型）可获得更强语义。
 - **本地引用模型。** `library_cite_check` 针对搜索结果页（`[n]` 编号）验证，不支持自由形式的来源名；模糊分数是有界的词序列部分匹配率。
 - **无摄取管线。** 文档须按路径导入（`md`/`txt`）；PDF/docx 抽取不在 v0.1.0 范围。
+- **宿主门控的审计事件。** `library/inject` / `library/purge` 只在能承载它们的宿主上写入（见「权限与数据」）；在已发布的 0.1.1-rc.2 线上不写入，所有事实仍可从工具调用/结果日志重建。
 
 ## 开发
 

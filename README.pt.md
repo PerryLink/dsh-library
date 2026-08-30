@@ -35,7 +35,7 @@
 O `dsh-library` transforma documentos md/txt locais em uma base de conhecimento consultável com um pipeline de qualidade em que seu agente pode confiar:
 
 - **`library_add` / `library_remove` / `library_list`** — importa um documento por caminho (dividido em chunks e embutido), remove um com **verificação de expurgo** (assinaturas do conteúdo removido são sondadas contra o índice restante e qualquer resíduo é reportado) e lista os metadados dos documentos.
-- **`library_search`** — ranking híbrido semântico + palavras-chave, re-ranking por diversidade de máxima relevância marginal, filtragem por relevância e **evitação do lost-in-the-middle** (os chunks mais fortes são fixados na cabeça e na cauda). Com `inject: true` a página de resultados é injetada no agente chamador; cada resultado carrega um marcador `[n]` e a injeção é reconstruível a partir do evento de sessão `library/inject`.
+- **`library_search`** — ranking híbrido semântico + palavras-chave, re-ranking por diversidade de máxima relevância marginal, filtragem por relevância e **evitação do lost-in-the-middle** (os chunks mais fortes são fixados na cabeça e na cauda). Com `inject: true` a página de resultados é injetada no agente chamador; cada resultado carrega um marcador `[n]` e a injeção é reconstruível a partir do evento de sessão `library/inject` (condicionado pelo host; veja Permissões e dados).
 - **`library_cite_check`** — verifica as citações `[n]` de uma resposta contra a página de resultados com correspondência difusa de tokens E uma checagem de similaridade semântica.
 - **`library_diagnose`** — histograma de tamanhos de chunk, pares de chunks quase duplicados, uma sonda de auto-recuperação e o sinal de penalidade do meio.
 - **`/library`** — resumos do índice por biblioteca em uma linha.
@@ -48,7 +48,7 @@ documento ── library_add ─▶ chunk (janela deslizante) ─▶ embed (hash
 consulta ── library_search ─▶ pontuação híbrida ─▶ re-rank MMR ─▶ filtro de relevância
                                      │                        ─▶ ordem lost-in-middle
                                      ▼
-                    página de resultados com marcadores [n] ── inject: true ─▶ agente + evento library/inject
+                    página de resultados com marcadores [n] ── inject: true ─▶ agente + evento library/inject (condicionado pelo host)
 ```
 
 ## Início rápido
@@ -120,7 +120,7 @@ Todos os ajustes são campos `Config` do Schemastery (alteráveis pelo cordis.ym
 
 - **Permissões**: o plugin só lê os arquivos apontados pelo `library_add` (pelo serviço de arquivos do harness e sua política) e escreve no seu próprio domínio de armazenamento `dsh_library`. Sem requisições de rede; um embedder externo opcional executa via `ctx.subprocess` sem interpretação de shell.
 - **Dados**: o texto dos chunks e os embeddings vivem no backend de armazenamento do host (a mesma confiança do restante dos dados duráveis da implantação); o plugin não adiciona criptografia. Caminhos de documentos e embeddings nunca entram no registro de sessão.
-- **Registro de sessão**: `library/inject` (id, consulta, ids de chunks, tamanho da página) e `library/purge` (veredicto) são eventos de auditoria somente-registro — a página injetada visível ao modelo é reconstruível a partir deles.
+- **Registro de sessão**: `library/inject` (id, consulta, ids de chunks, tamanho da página) e `library/purge` (veredicto) são eventos de auditoria somente-registro — a página injetada visível ao modelo é reconstruível a partir deles. O append é condicionado pelo host: harnesses cujo conjunto de tipos conhecidos cobre o vocabulário recebem os eventos, builds com envelope `ignorable` os recebem com o marcador, e builds sem envelope (0.1.1-rc.2, 0.1.2-alpha.1) pulam o append — ali, os eventos registrados `tool/call` + `tool/result` continuam sendo a trilha de auditoria reconstruível.
 
 ## Limites de segurança
 
@@ -134,6 +134,7 @@ Todos os ajustes são campos `Config` do Schemastery (alteráveis pelo cordis.ym
 - **Embeddings de grau léxico.** O embedder hash integrado pontua similaridade superficial, não significado; a qualidade de recuperação em paráfrases é menor que com um modelo real — configure `embedding.command` para semântica mais forte.
 - **Modelo de citação local.** O `library_cite_check` valida contra a página de resultados (a numeração `[n]`), não contra nomes de fonte livres; a pontuação difusa é uma razão parcial de sequências de tokens limitada.
 - **Sem pipeline de ingestão.** Os documentos devem ser importados por caminho (`md`/`txt`); a extração de PDF/docx fica fora da v0.1.0.
+- **Eventos de auditoria condicionados pelo host.** `library/inject` / `library/purge` só são gravados em harnesses que podem carregá-los (veja Permissões e dados); na linha publicada 0.1.1-rc.2 eles não são gravados, e cada fato continua reconstruível a partir do registro de chamada/resultado da ferramenta.
 
 ## Desenvolvimento
 

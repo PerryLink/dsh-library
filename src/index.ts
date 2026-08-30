@@ -4,8 +4,10 @@
  * hybrid semantic+keyword pipeline (diversity re-rank, relevance filter,
  * lost-in-the-middle avoidance), verify citations against retrieved chunks,
  * and diagnose chunk/retrieval quality. Everything model-visible carries a
- * source marker and is reconstructable from the `library/inject` session
- * event; document paths and embeddings never reach the log.
+ * source marker. The `library/inject` and `library/purge` audit events are
+ * appended through the adaptive host gate (see `events.ts`); where the host
+ * cannot carry them, the logged `tool/call` + `tool/result` events remain the
+ * reconstructable trail. Document paths and embeddings never reach the log.
  *
  * Function plugin — no default export (the Loader unwraps
  * `exports.default ?? exports`).
@@ -32,6 +34,7 @@ import { scoreRelevance } from './quality/relevance.ts'
 import { validateCitations } from './quality/citation.ts'
 import { verifyReferences } from './quality/reference.ts'
 import { verifyPurge } from './quality/purge.ts'
+import { appendAuditEvent, INJECT_EVENT, PURGE_EVENT, type LibraryInjectEvent, type LibraryPurgeEvent } from './events.ts'
 
 export const name = 'dsh-library'
 
@@ -58,6 +61,8 @@ export { extractCitationNumbers, extractSentenceWithCitation, fuzzyPartialRatio,
 export type { CitationMatch, ValidationResult } from './quality/citation.ts'
 export { verifyPurge, sampleSignatures } from './quality/purge.ts'
 export type { RemainingChunk, PurgeProbeResult, PurgeReport, PurgeOptions } from './quality/purge.ts'
+export { INJECT_EVENT, PURGE_EVENT, appendAuditEvent } from './events.ts'
+export type { LibraryInjectEvent, LibraryPurgeEvent } from './events.ts'
 
 /** Durable document record. */
 const documentSchema = zod.object({
@@ -103,28 +108,6 @@ export const libraryDomainSpec = defineDomain({
     purges: { valueSchema: purgeSchema },
   },
 })
-
-/** The session audit events (declaration merging; model-visible ⟺ logged). */
-declare module '@deepseek-ai/dsh-session/types' {
-  interface SessionEventMap {
-    /** One `library_search` injection: id links the injected marker text back to this event. */
-    'library/inject': {
-      injectId: string
-      library: string
-      query: string
-      chunks: string[]
-      chars: number
-    }
-    /** One `library_remove` purge verification outcome. */
-    'library/purge': {
-      purgeId: string
-      library: string
-      documentId: string
-      passed: boolean
-      totalFound: number
-    }
-  }
-}
 
 /** Optional seams resolved at call time; the embedder is resolved at mount (fail closed when absent). */
 interface StoreDeps {
@@ -524,12 +507,12 @@ interface LibraryServices {
   readonly store: LibraryStore
 }
 
-/** Append one audit event; a failed append never changes the outcome. */
-function audit(exec: ToolRunContext, type: 'library/inject' | 'library/purge', event: Record<string, unknown>): void {
+/** Append one audit event through the adaptive host gate; a failed append never changes the outcome. */
+function audit(exec: ToolRunContext, type: typeof INJECT_EVENT | typeof PURGE_EVENT, event: LibraryInjectEvent | LibraryPurgeEvent): void {
   const session = exec.agent?.session
   if (session === undefined) return
   try {
-    session.append(type, event as never)
+    appendAuditEvent(session, type, event)
   } catch {
     // The tool result still logs the model-visible content.
   }

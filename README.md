@@ -36,7 +36,7 @@
 `dsh-library` turns local md/txt documents into a queryable knowledge base with a quality pipeline your agent can trust:
 
 - **`library_add` / `library_remove` / `library_list`** — import a document by path (chunked and embedded), remove one with **purge verification** (signatures of the removed content are probed against the remaining index and any residue is reported), and list document metadata.
-- **`library_search`** — hybrid semantic + keyword ranking, maximal-marginal-relevance diversity re-rank, relevance filtering, and **lost-in-the-middle avoidance** (strongest chunks pinned to head and tail). With `inject: true` the result page is injected into the calling agent; every hit carries a `[n]` source marker and the injection is reconstructable from the `library/inject` session event.
+- **`library_search`** — hybrid semantic + keyword ranking, maximal-marginal-relevance diversity re-rank, relevance filtering, and **lost-in-the-middle avoidance** (strongest chunks pinned to head and tail). With `inject: true` the result page is injected into the calling agent; every hit carries a `[n]` source marker and the injection is reconstructable from the `library/inject` session event (host-gated; see Permissions & data).
 - **`library_cite_check`** — verify the `[n]` citations in an answer against the search result page with a fuzzy token match AND a semantic similarity check.
 - **`library_diagnose`** — chunk-size histogram, near-duplicate chunk pairs, a self-retrieval probe, and the middle-penalty signal.
 - **`/library`** — one-line index summaries per library.
@@ -49,7 +49,7 @@ document ── library_add ─▶ chunk (sliding window) ─▶ embed (hash / e
 query ── library_search ─▶ hybrid score ─▶ MMR re-rank ─▶ relevance filter
                                   │                    ─▶ lost-in-middle order
                                   ▼
-                    result page with [n] markers ── inject: true ─▶ agent + library/inject event
+                    result page with [n] markers ── inject: true ─▶ agent + library/inject event (host-gated)
 ```
 
 ## Quick start
@@ -121,7 +121,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 
 - **Permissions**: the plugin only reads files you point `library_add` at (through the harness filesystem service and its policy) and writes into its own `dsh_library` storage domain. No network requests; an optional external embedder runs through `ctx.subprocess` without shell interpretation.
 - **Data**: chunk text and embeddings live in the host's storage backend (same trust as the deployment's other durable data); the plugin adds no encryption. Document paths and embeddings never enter the session log.
-- **Session log**: `library/inject` (id, query, chunk ids, page size) and `library/purge` (verdict) are log-only audit events — the model-visible injected page is reconstructable from them.
+- **Session log**: `library/inject` (id, query, chunk ids, page size) and `library/purge` (verdict) are log-only audit events — the model-visible injected page is reconstructable from them. The append is host-gated: harnesses whose known-type set covers the vocabulary get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-alpha.1) skip the append — the logged `tool/call` + `tool/result` events remain the reconstructable audit trail there.
 
 ## Security boundaries
 
@@ -135,6 +135,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 - **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` (any subprocess embedder) or `embedding.provider: ollama` (a local Ollama embedding model) for stronger semantics.
 - **Local citation model.** `library_cite_check` validates against the search result page (the `[n]` numbering), not against free-form source names; the fuzzy score is a bounded token-sequence partial ratio.
 - **No ingestion pipeline.** Documents must be imported by path (`md`/`txt`); PDF/docx extraction is out of scope for v0.1.0.
+- **Host-gated audit events.** `library/inject` / `library/purge` are only appended on harnesses that can carry them (see Permissions & data); on the published 0.1.1-rc.2 line they are not appended, and every fact stays reconstructable from the tool call/result log.
 
 ## Development
 

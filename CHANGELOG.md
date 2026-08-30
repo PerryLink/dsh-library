@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Session audit appends (`library/inject`, `library/purge`) now go through an adaptive host gate: harnesses whose known-type set covers the vocabulary get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-alpha.1, which fail closed on unknown event types at read) get no append — the logged `tool/call` + `tool/result` events remain the reconstructable audit trail. Plugin behavior is otherwise unchanged.
+
+### Fixed
+
+- CI flake: the real-stack robustness tests could exceed vitest's 5s default timeout on windows-latest with Node 24 under v8 coverage instrumentation; the suite timeout is now 30s.
+- The test harness no longer imports `CallId` from `@deepseek-ai/dsh-llm` (renamed to `ToolCallId` on host master); the call-id brand is now derived from `ToolExecution['callId']`, keeping both the checkout and the published 0.1.1-rc.2 type rulers green.
+
 ## [0.2.0] - 2026-08-26
 
 ### Added
