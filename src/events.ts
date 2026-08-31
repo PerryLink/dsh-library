@@ -12,7 +12,7 @@
  *   with the marker, so builds that do not know the type skip it on restore;
  * - envelope-less hosts (0.1.0-rc.6/rc.8, 0.1.1-rc.2, and 0.1.2-alpha.1,
  *   which removed the envelope and fails closed on unknown types at read)
- *   get no append — the tool results remain the reconstructable audit trail.
+ *   get no append 鈥?the tool results remain the reconstructable audit trail. On 0.1.2-alpha.2 the envelope field is restored for stored-log read compatibility only - its Session.append still cannot stamp the marker, so the gate behavior is unchanged.
  *
  * @module dsh-library/events
  */
