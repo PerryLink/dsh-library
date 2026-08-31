@@ -5,11 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Align devDeps pins to the published dsh 0.1.2-alpha.2 line (0.1.1-rc.2 -> 0.1.2-alpha.2); no behavior change to envelope/gating semantics.
+
 ## [0.2.1] - 2026-08-30
 
 ### Changed
 
-- Session audit appends (`library/inject`, `library/purge`) now go through an adaptive host gate: harnesses whose known-type set covers the vocabulary get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-alpha.1, which fail closed on unknown event types at read) get no append — the logged `tool/call` + `tool/result` events remain the reconstructable audit trail. Plugin behavior is otherwise unchanged.
+- Session audit appends (`library/inject`, `library/purge`) now go through an adaptive host gate: harnesses whose known-type set covers the vocabulary get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-alpha.1, which fail closed on unknown event types at read) get no append 鈥?the logged `tool/call` + `tool/result` events remain the reconstructable audit trail. Plugin behavior is otherwise unchanged.
 
 ### Fixed
 
