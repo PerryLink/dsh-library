@@ -120,7 +120,8 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 
 - **权限**：插件只读取你让 `library_add` 指向的文件（经 harness 文件系统服务及其策略），并只写入自己的 `dsh_library` 存储域。无网络请求；可选外部嵌入命令经 `ctx.subprocess` 执行、无 shell 解释。
 - **数据**：切片文本与嵌入存放在宿主的存储后端（与部署的其他持久数据同级信任）；插件不额外加密。文档路径与嵌入向量绝不进入会话日志。
-- **会话日志**：`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志审计事件 —— 模型可见的注入页可从中重建。写入受宿主门控：已知类型集合覆盖该词汇的宿主直接写入；带 `ignorable` 信封的构建加标记写入；无信封构建（0.1.1-rc.2、0.1.2-alpha.1）跳过写入 —— 此时已记录的 `tool/call` + `tool/result` 事件仍是可重建的审计链。
+- **会话日志**：`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志审计事件 —— 模型可见的注入页可从中重建。写入受宿主门控：已知类型集合覆盖该词汇的宿主直接写入；带 `ignorable` 信封的构建加标记写入；无信封构建（0.1.1-rc.2、0.1.2-alpha.2）跳过写入 —— 此时已记录的 `tool/call` + `tool/result` 事件仍是可重建的审计链。
+0.1.2-alpha.2（2026-08-31 已适配）：会话信封保留 ignorable 字段但仅用于存量日志读取兼容——Session.append 仍无法盖章，门控行为不变。
 
 ## 安全边界
 
