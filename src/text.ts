@@ -30,9 +30,42 @@ export function tokenize(text: string): string[] {
   return tokens
 }
 
+/**
+ * CJK-aware scoring tokenization: like {@link tokenize}, but every CJK run
+ * contributes its unigrams plus its adjacent bigrams, so a query and a
+ * document overlap on sub-phrases instead of only on identical whole runs.
+ * @param text - input text.
+ * @returns the expanded token list.
+ */
+export function cjkTokenize(text: string): string[] {
+  const tokens: string[] = []
+  const pattern = /[a-z0-9]+|[\u00c0-\uffff]+/giu
+  for (const match of normalize(text).matchAll(pattern)) {
+    const run = match[0]
+    if (/^[\u4e00-\u9fff]+$/u.test(run)) {
+      for (const char of run) tokens.push(char)
+      for (let index = 0; index < run.length - 1; index += 1) tokens.push(run.slice(index, index + 2))
+    } else {
+      tokens.push(run)
+    }
+  }
+  return tokens
+}
+
 /** Deduplicated token set of one text. */
 export function tokenSet(text: string): ReadonlySet<string> {
   return new Set(tokenize(text))
+}
+
+/**
+ * Term-frequency map of a token list: token → occurrence count.
+ * @param tokens - the token list.
+ * @returns the frequency map (plain object, no prototype).
+ */
+export function termFrequenciesOf(tokens: readonly string[]): Record<string, number> {
+  const frequencies = Object.create(null) as Record<string, number>
+  for (const token of tokens) frequencies[token] = (frequencies[token] ?? 0) + 1
+  return frequencies
 }
 
 /**
@@ -41,9 +74,7 @@ export function tokenSet(text: string): ReadonlySet<string> {
  * @returns the frequency map (plain object, no prototype).
  */
 export function termFrequencies(text: string): Record<string, number> {
-  const frequencies = Object.create(null) as Record<string, number>
-  for (const token of tokenize(text)) frequencies[token] = (frequencies[token] ?? 0) + 1
-  return frequencies
+  return termFrequenciesOf(tokenize(text))
 }
 
 /**

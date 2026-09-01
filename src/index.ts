@@ -383,7 +383,7 @@ export class LibraryStore {
       Math.min(candidates.length, MAX_CANDIDATE_BOUND),
     )
     const filtered = reranked
-      .filter(entry => scoreRelevance(query, entry.chunk.text) >= this.config.search.minRelevance)
+      .filter(entry => entry.relevance >= this.config.search.minRelevance)
       .slice(0, 500)
     const reordered = avoidLostMiddle(
       filtered.map(entry => ({ id: entry.chunk.chunkId, score: entry.relevance })),

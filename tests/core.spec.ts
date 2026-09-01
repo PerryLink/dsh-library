@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { Config, resolveConfig, LIBRARY_NAME } from '../src/config.ts'
-import { normalize, tokenize, tokenSet, termFrequencies, charNGrams, tokenNGrams, fnv1a } from '../src/text.ts'
+import { normalize, tokenize, cjkTokenize, tokenSet, termFrequencies, charNGrams, tokenNGrams, fnv1a } from '../src/text.ts'
 import { embedHash, cosine, splitCommandLine } from '../src/embedding.ts'
 import { documentIdOf, chunkIdOf, parseChunkId, documentKey, chunkKey } from '../src/ids.ts'
 import { libraryDomainSpec } from '../src/index.ts'
@@ -46,6 +46,11 @@ describe('text utilities', () => {
   it('normalizes and tokenizes (CJK-aware)', () => {
     expect(normalize('  Hello   World ')).toBe('hello world')
     expect(tokenize('Hello 世界')).toEqual(['hello', '世界'])
+  })
+
+  it('expands CJK runs into unigrams plus adjacent bigrams for scoring', () => {
+    expect(cjkTokenize('中文')).toEqual(['中', '文', '中文'])
+    expect(cjkTokenize('Hello 世界')).toEqual(['hello', '世', '界', '世界'])
   })
 
   it('tokenSet deduplicates', () => {

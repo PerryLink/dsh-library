@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- The `library_search` relevance gate now filters on the hybrid score — the same value the diversity re-rank orders by — instead of re-scoring each chunk lexically, so semantic matches pass the `search.minRelevance` threshold ([#2](https://github.com/PerryLink/dsh-library/issues/2)).
+- CJK queries now score through unigram + adjacent-bigram tokens instead of whole-run tokens, so partial Chinese phrase overlaps pass the relevance gate ([#2](https://github.com/PerryLink/dsh-library/issues/2)).
+
 ## [0.2.2] - 2026-09-01
 
 ### Changed

@@ -90,6 +90,12 @@ describe('relevance (Context-Relevance-Scorer port)', () => {
     expect(scoreRelevance('', 'anything')).toBe(0)
   })
 
+  it('scores CJK queries through unigram and bigram overlap', () => {
+    expect(scoreRelevance('中文查询', '中文查询检索失效的文档')).toBe(1)
+    expect(scoreRelevance('查询失效', '中文查询检索失效')).toBeCloseTo(6 / 7)
+    expect(scoreRelevance('天气', '中文查询检索失效')).toBe(0)
+  })
+
   it('filters documents below the threshold', () => {
     const kept = filterDocuments('red fish', ['red fish swim', 'blue birds fly'], 0.5)
     expect(kept).toEqual(['red fish swim'])

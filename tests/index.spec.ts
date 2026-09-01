@@ -67,6 +67,25 @@ describe('library tools through the real pipeline', () => {
     }
   })
 
+  it('filters on the hybrid score instead of the lexical score', async () => {
+    const harness = await mountHarness({ search: { hybridWeight: 1, minRelevance: 0.45 } })
+    try {
+      await addSample(harness, 'docs', 'cat.txt', 'cat')
+      const searched = await callTool(harness, 'library_search', { library: 'docs', query: 'catx' })
+      expect(searched.isError).toBe(false)
+      if (searched.isError) throw new Error(searched.error.message)
+      const value = searched.value as { results: Array<{ snippet: string }> }
+      // 'catx' shares no word token with 'cat' (lexical score 0), but the
+      // character-trigram embeddings overlap (cosine ≈ 0.55), so the
+      // semantic-only hybrid score clears a gate the old lexical filter
+      // would have failed.
+      expect(value.results.length).toBeGreaterThan(0)
+      expect(value.results[0]!.snippet).toContain('cat')
+    } finally {
+      await unmountHarness(harness)
+    }
+  })
+
   it('verifies citations against the result page', async () => {
     const harness = await mountHarness()
     try {

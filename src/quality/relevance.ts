@@ -4,11 +4,13 @@
  * retrieval. The upstream cross-encoder model is replaced by a local-rules
  * lexical scorer (zero downloads): token overlap weighted toward rarer
  * query terms, normalized to 0..1 — same `(document, score, passed)` API
- * shape as the upstream `score_batch`/`filter_documents`.
+ * shape as the upstream `score_batch`/`filter_documents`. Scoring tokenizes
+ * CJK runs into unigrams plus adjacent bigrams so partial phrase overlaps
+ * count, instead of whole runs matching only on exact equality.
  * @module dsh-library/quality/relevance
  */
 
-import { termFrequencies, tokenize } from '../text.ts'
+import { cjkTokenize, termFrequenciesOf } from '../text.ts'
 
 /**
  * Score one document's relevance to a query with the local-rules scorer.
@@ -21,10 +23,10 @@ import { termFrequencies, tokenize } from '../text.ts'
  * @returns relevance within 0..1 (0 for an empty query or document).
  */
 export function scoreRelevance(query: string, document: string): number {
-  const queryTokens = tokenize(query)
+  const queryTokens = cjkTokenize(query)
   if (queryTokens.length === 0) return 0
-  const documentTerms = termFrequencies(document)
-  const queryTerms = termFrequencies(query)
+  const documentTerms = termFrequenciesOf(cjkTokenize(document))
+  const queryTerms = termFrequenciesOf(queryTokens)
   let covered = 0
   let total = 0
   for (const [token, count] of Object.entries(queryTerms)) {
