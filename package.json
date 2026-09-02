@@ -1,7 +1,7 @@
 {
   "name": "dsh-library",
-  $10.2.3",
-  "description": "Local document knowledge base for DeepSeek Harness: library_add/remove/list, hybrid semantic+keyword library_search with diversity re-ranking, relevance filtering and lost-in-the-middle avoidance, citation-aware injection, library_cite_check and library_diagnose 闁炽儲鎽琎Lite-backed index via the storage domain, local embedding, zero model downloads",
+  "version": "0.2.3",
+  "description": "Local document knowledge base for DeepSeek Harness: library_add/remove/list, hybrid semantic+keyword library_search with diversity re-ranking, relevance filtering and lost-in-the-middle avoidance, citation-aware injection, library_cite_check and library_diagnose 閳ユ摬QLite-backed index via the storage domain, local embedding, zero model downloads",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PerryLink/dsh-library.git"
