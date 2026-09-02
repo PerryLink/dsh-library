@@ -33,7 +33,7 @@ describe('library/purge audit gate', () => {
 
       // The published 0.1.1-rc.2 host neither knows the plugin vocabulary nor
       // has the `ignorable` envelope, so the gate must not append.
-      expect(harness.session.events.filter(event => event.type === 'library/purge')).toHaveLength(0)
+      expect(harness.session.snapshotEvents().filter(event => event.type === 'library/purge')).toHaveLength(0)
     } finally {
       await unmountHarness(harness)
     }
@@ -52,7 +52,7 @@ describe('library/purge audit gate', () => {
 
         await callTool(harness, 'library_remove', { library: 'docs', documentId })
 
-        const purgeEvent = harness.session.events.filter(event => event.type === 'library/purge').at(-1)
+        const purgeEvent = harness.session.snapshotEvents().filter(event => event.type === 'library/purge').at(-1)
         expect(purgeEvent?.data).toMatchObject({ library: 'docs', documentId, passed: true })
       } finally {
         await unmountHarness(harness)

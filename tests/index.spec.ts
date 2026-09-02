@@ -58,7 +58,7 @@ describe('library tools through the real pipeline', () => {
       // The published 0.1.1-rc.2 host neither knows the plugin vocabulary nor
       // has the `ignorable` envelope, so the audit gate skips the append; the
       // logged tool result (and the injected page itself) remain the audit trail.
-      expect(harness.session.events.filter(event => event.type === 'library/inject')).toHaveLength(0)
+      expect(harness.session.snapshotEvents().filter(event => event.type === 'library/inject')).toHaveLength(0)
 
       const text = searched.content.filter((block: ContentBlock) => block.type === 'text').map(block => (block as { text: string }).text).join('\n')
       expect(text).toContain('[1]')
