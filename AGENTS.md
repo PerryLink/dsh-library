@@ -9,7 +9,7 @@ Standalone DeepSeek Harness plugin repository (`dsh-library`). Development follo
 - `src/embedding.ts` — deterministic hash embedder (word tokens + character tri-grams into a signed bucket vector, L2-normalized; cosine = dot product), the external embedder subprocess protocol (JSON lines both ways, completeness-checked), and command-line splitting (no shell interpretation).
 - `src/text.ts` — normalization, CJK-aware tokenization, term frequencies, char/token n-grams, FNV-1a.
 - `src/ids.ts` — content-derived document ids, chunk ids, purge/injection ids, domain record keys.
-- `src/events.ts` — the `library/inject` + `library/purge` `SessionEventMap` members (declaration merging), the payload types, and the adaptive append gate: known-vocabulary hosts get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-alpha.5, which fail closed on unknown event types at read) get no append.
+- `src/events.ts` — the `library/inject` + `library/purge` `SessionEventMap` members (declaration merging), the payload types, and the adaptive append gate: known-vocabulary hosts get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-rc.1, which fail closed on unknown event types at read) get no append.
 - `src/quality/` — the eight upstream ports as pure functions (see THIRD_PARTY_NOTICES): chunk-visual, diversity, lost-middle, relevance, few-shot, reference, citation, purge.
 
 ## Hard rules applied here
@@ -25,7 +25,7 @@ Standalone DeepSeek Harness plugin repository (`dsh-library`). Development follo
 
 `pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build && pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm pack`
 
-- `typecheck` resolves `@deepseek-ai/*` through tsconfig paths to the local harness checkout; `typecheck:ci` clears the paths and checks against the published `0.1.2-alpha.5` types. Both must stay green.
+- `typecheck` resolves `@deepseek-ai/*` through tsconfig paths to the local harness checkout; `typecheck:ci` clears the paths and checks against the published `0.1.2-rc.1` types. Both must stay green.
 - Tests run against the REAL stack: storage hub + JSON backend + storage domain, real `ToolRuntime`/`Commands`/`Session`, and a real local filesystem over a per-test mkdtemp sandbox.
 
 ## Docs
