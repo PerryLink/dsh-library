@@ -135,7 +135,7 @@ Todos los ajustes son campos `Config` de Schemastery (modificables desde cordis.
 - **Embeddings de grado léxico.** El embedder hash integrado puntúa similitud superficial, no significado; la calidad de recuperación en paráfrasis es menor que con un modelo real — configura `embedding.command` para semántica más fuerte.
 - **Modelo de citas local.** `library_cite_check` valida contra la página de resultados (la numeración `[n]`), no contra nombres de fuente libres; la puntuación difusa es una razón parcial de secuencias de tokens acotada.
 - **Sin pipeline de ingesta.** Los documentos deben importarse por ruta (`md`/`txt`); la extracción de PDF/docx queda fuera de v0.1.0.
-- **Eventos de auditoría condicionados por el host.** `library/inject` / `library/purge` solo se añaden en harnesses que pueden llevarlos (ver Permisos y datos); en la línea publicada 0.1.1-rc.2 no se añaden, y cada hecho sigue siendo reconstruible desde el registro de llamada/resultado de la herramienta.
+- **Eventos de auditoría condicionados por el host.** `library/inject` / `library/purge` solo se añaden en harnesses que pueden llevarlos (ver Permisos y datos); en la línea publicada `0.1.2-rc.1` (como en las líneas sin envoltura anteriores) no se añaden, y cada hecho sigue siendo reconstruible desde el registro de llamada/resultado de la herramienta.
 
 ## Desarrollo
 

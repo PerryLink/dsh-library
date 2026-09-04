@@ -136,7 +136,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 - **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` (any subprocess embedder) or `embedding.provider: ollama` (a local Ollama embedding model) for stronger semantics.
 - **Local citation model.** `library_cite_check` validates against the search result page (the `[n]` numbering), not against free-form source names; the fuzzy score is a bounded token-sequence partial ratio.
 - **No ingestion pipeline.** Documents must be imported by path (`md`/`txt`); PDF/docx extraction is out of scope for v0.1.0.
-- **Host-gated audit events.** `library/inject` / `library/purge` are only appended on harnesses that can carry them (see Permissions & data); on the published 0.1.1-rc.2 line they are not appended, and every fact stays reconstructable from the tool call/result log.
+- **Host-gated audit events.** `library/inject` / `library/purge` are only appended on harnesses that can carry them (see Permissions & data); on the published `0.1.2-rc.1` line (as on earlier envelope-less lines) they are not appended, and every fact stays reconstructable from the tool call/result log.
 
 ## Development
 
