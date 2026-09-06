@@ -25,7 +25,7 @@
 
 | 方面 | 状态 |
 |---|---|
-| Harness | DeepSeek Harness `0.1.2-rc.1`（声明兼容 `0.1.2-rc.1`） |
+| Harness | DeepSeek Harness `0.1.2-rc.1`（声明兼容 `0.1.2-rc.1`）。2026-09-06 已对照 dsh-v0.1.3-alpha.1 master checkout 核验（完整门禁链 + profile 安装冒烟）。 |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | 存储 | 任意 storage-domain 后端（JSON 或 SQLite）；索引存放在宿主的存储域中 |
 | 模型 | 无需任何模型 —— 内置嵌入为确定性哈希（零下载） |
