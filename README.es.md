@@ -25,7 +25,7 @@
 
 | Superficie | Estado |
 |---|---|
-| Harness | DeepSeek Harness `0.1.2-rc.1` (compatibilidad declarada para `0.1.2-rc.1`). Verificado el 2026-09-06 contra el checkout master de dsh-v0.1.3-alpha.1 (cadena de puertas completa + smoke de instalación de profile). |
+| Harness | DeepSeek Harness `dsh-v0.1.3-alpha.1` (compatibilidad declarada para `0.1.2-rc.1`). Verificado el 2026-09-06 contra el checkout master de dsh-v0.1.3-alpha.1 (cadena de puertas completa + smoke de instalación de profile). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Almacenamiento | Cualquier backend de storage-domain (JSON o SQLite); el índice vive en el dominio de almacenamiento del host |
 | Modelos | Ninguno requerido — el embedder integrado es hash determinista (cero descargas) |
