@@ -64,6 +64,7 @@ export type { RemainingChunk, PurgeProbeResult, PurgeReport, PurgeOptions } from
 export { INJECT_EVENT, PURGE_EVENT, appendAuditEvent } from './events.ts'
 export type { LibraryInjectEvent, LibraryPurgeEvent } from './events.ts'
 
+// Service Definition — the dsh-library contract: zod record schemas, the storage-domain spec, and the exported result interfaces below.
 /** Durable document record. */
 const documentSchema = zod.object({
   library: zod.string(),
@@ -532,6 +533,7 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
   const store = new LibraryStore(domain, resolved, await storeDepsOf(ctx, resolved))
   const services: LibraryServices = { ctx, config: resolved, store }
 
+  // Service Provider — registers the tool family and the /library command through ctx.tools/ctx.commands effects.
   for (const tool of allTools(services)) {
     ctx.effect(() => ctx.tools.register(tool), `dsh-library: ${tool.name} tool`)
   }
@@ -576,6 +578,7 @@ export function allTools(services: LibraryServices) {
   ]
 }
 
+// Consumer — tool execute handlers consume the filesystem seam and the LibraryStore; the command handler reads store state.
 /** `library_add` — import one md/txt document by path into a library. */
 function libraryAddTool(services: LibraryServices) {
   const { store, ctx } = services
