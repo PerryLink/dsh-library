@@ -29,10 +29,10 @@
     "THIRD_PARTY_NOTICES.md",
     "SECURITY.md",
     "README.md",
-    "README.zh.md",
-    "README.es.md",
-    "README.pt.md",
-    "README.hi.md",
+    "README-zh.md",
+    "README-es.md",
+    "README-pt.md",
+    "README-hi.md",
     "LICENSE"
   ],
   "dsh": {
