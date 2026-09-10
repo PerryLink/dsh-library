@@ -26,7 +26,7 @@
 
 | सतह | स्थिति |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.5-alpha.1` (`0.1.2-rc.1` के लिए घोषित संगतता)। 2026-09-09 को dsh-v0.1.5-alpha.1 master checkout के विरुद्ध सत्यापित (पूर्ण गेट श्रृंखला + profile इंस्टॉल smoke)। |
+| Harness | DeepSeek Harness `dsh-v0.1.5-rc.1` (`0.1.5-rc.1` के लिए घोषित संगतता)। 2026-09-10 को dsh-v0.1.5-rc.1 master checkout के विरुद्ध सत्यापित (पूर्ण गेट श्रृंखला + profile इंस्टॉल smoke)। |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | भंडारण | कोई भी storage-domain बैकएंड (JSON या SQLite); सूचकांक होस्ट के भंडारण डोमेन में रहता है |
 | मॉडल | किसी की आवश्यकता नहीं — अंतर्निहित एम्बेडर नियतात्मक हैश है (शून्य डाउनलोड) |
@@ -143,7 +143,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests स्थानीय हार्नेस चेकआउट के विरुद्ध
-pnpm run typecheck:ci  # tsc प्रकाशित 0.1.2-rc.1 प्रकारों के विरुद्ध (बिना paths)
+pnpm run typecheck:ci  # tsc प्रकाशित 0.1.5-rc.1 प्रकारों के विरुद्ध (बिना paths)
 pnpm test           # vitest: गुणवत्ता पोर्ट, मूल शब्दावली, वास्तविक-स्टैक संयोजन
 pnpm run build      # tsdown बंडल + tsc घोषणाएँ (lib/)
 pnpm run verify:self-contained  # निर्भरता स्पेक registry से हल होती हैं

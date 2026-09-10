@@ -27,7 +27,7 @@
 
 | Surface | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.5-alpha.1` (compat declared for `0.1.2-rc.1`). Verified 2026-09-09 against the dsh-v0.1.5-alpha.1 master checkout (full gate chain + profile install smoke). |
+| Harness | DeepSeek Harness `dsh-v0.1.5-rc.1` (compat declared for `0.1.5-rc.1`). Verified 2026-09-10 against the dsh-v0.1.5-rc.1 master checkout (full gate chain + profile install smoke). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Storage | Any storage-domain backend (JSON or SQLite); the index lives in the host's storage domain |
 | Models | None required — the built-in embedder is deterministic hashing (zero downloads) |
@@ -144,7 +144,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests against the local harness checkout
-pnpm run typecheck:ci  # tsc against the published 0.1.2-rc.1 types (no paths)
+pnpm run typecheck:ci  # tsc against the published 0.1.5-rc.1 types (no paths)
 pnpm test           # vitest: quality ports, core vocabulary, real-stack assembly
 pnpm run build      # tsdown bundle + tsc declarations (lib/)
 pnpm run verify:self-contained  # dependency specs resolve from the registry
