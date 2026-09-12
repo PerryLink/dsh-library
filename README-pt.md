@@ -26,7 +26,7 @@
 
 | Superfície | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.5-rc.1` (compatibilidade declarada para `0.1.5-rc.1`). Verificado em 2026-09-10 contra o checkout master do dsh-v0.1.5-rc.1 (cadeia de portas completa + smoke de instalação de profile). |
+| Harness | DeepSeek Harness `dsh-v0.1.5-rc.2` (compatibilidade declarada para `0.1.5-rc.2`). Verificado em 2026-09-11 contra o checkout master do dsh-v0.1.5-rc.2 (cadeia de portas completa + smoke de instalação de profile). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Armazenamento | Qualquer backend de storage-domain (JSON ou SQLite); o índice vive no domínio de armazenamento do host |
 | Modelos | Nenhum necessário — o embedder integrado é hash determinístico (zero downloads) |
@@ -143,7 +143,7 @@ Todos os ajustes são campos `Config` do Schemastery (alteráveis pelo cordis.ym
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests contra o checkout local do harness
-pnpm run typecheck:ci  # tsc contra os tipos publicados 0.1.5-rc.1 (sem paths)
+pnpm run typecheck:ci  # tsc contra os tipos publicados 0.1.5-rc.2 (sem paths)
 pnpm test           # vitest: portas de qualidade, vocabulário núcleo, montagem com pilha real
 pnpm run build      # bundle tsdown + declarações tsc (lib/)
 pnpm run verify:self-contained  # especificações de dependências resolvem pelo registry
