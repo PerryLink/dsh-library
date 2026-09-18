@@ -14,7 +14,9 @@
  * @module dsh-library
  */
 
+import { Context as CordisContext } from '@deepseek-ai/cordis'
 import type { Context } from '@deepseek-ai/cordis'
+import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-commands'
 import type { CommandInvocation } from '@deepseek-ai/dsh-commands'
 import { defineDomain, type Domain, type KvTable } from '@deepseek-ai/dsh-storage-domain'
@@ -34,7 +36,7 @@ import { scoreRelevance } from './quality/relevance.ts'
 import { validateCitations } from './quality/citation.ts'
 import { verifyReferences } from './quality/reference.ts'
 import { verifyPurge } from './quality/purge.ts'
-import { appendAuditEvent, INJECT_EVENT, PURGE_EVENT, type LibraryInjectEvent, type LibraryPurgeEvent } from './events.ts'
+import { adoptMarkerSupport, appendAuditEvent, INJECT_EVENT, probeMarkerSupport, PURGE_EVENT, type LibraryInjectEvent, type LibraryPurgeEvent } from './events.ts'
 
 export const name = 'dsh-library'
 
@@ -530,7 +532,31 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
   const resolved = resolveConfig(config)
   const domain = await ctx.storageDomain.open(libraryDomainSpec)
   ctx.effect(() => () => domain.close(), 'dsh-library: storage domain')
-  const store = new LibraryStore(domain, resolved, await storeDepsOf(ctx, resolved))
+  const deps = await storeDepsOf(ctx, resolved)
+  // A02: the dependency resolution opens an await window. If the fiber was
+  // disposed while it ran, every later `ctx.effect` would throw
+  // INACTIVE_EFFECT and the tool/command registrations would be lost (and a
+  // remount would re-open the domain on top of a live one). Stop here instead:
+  // the domain effect above already closed the handle with the fiber.
+  if (ctx.fiber.uid === null) return
+  // Observe (never infer) whether this host stamps the `ignorable` envelope:
+  // append one audit event on a throwaway session and read the record back.
+  // Fail closed to 'unsupported' on any error — the probe must never make the
+  // mount fail, and a wrong "supported" verdict would write unmarked events
+  // into real logs.
+  try {
+    const probeContext = new CordisContext()
+    const probeFiber = await probeContext.plugin(SessionStore)
+    try {
+      const probeSession = probeContext.sessions.create(SessionId('dsh-library-marker-probe'))
+      adoptMarkerSupport(await probeMarkerSupport(() => probeSession))
+    } finally {
+      await probeFiber.dispose()
+    }
+  } catch {
+    adoptMarkerSupport('unsupported')
+  }
+  const store = new LibraryStore(domain, resolved, deps)
   const services: LibraryServices = { ctx, config: resolved, store }
 
   // Service Provider — registers the tool family and the /library command through ctx.tools/ctx.commands effects.
