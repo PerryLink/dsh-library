@@ -6,13 +6,19 @@
  * exist outside them: the inject id linking the injected marker text back to
  * the search that produced it, and each purge-verification verdict.
  *
- * The gate appends only when the host can carry the events safely:
+ * The gate appends only when the host can carry the events safely, and the
+ * host's capability is OBSERVED at mount time rather than inferred from an
+ * append implementation's source text:
  * - hosts whose known-type set covers the vocabulary append plainly;
- * - hosts with an `ignorable` append option (pre-0.1.2 master builds) append
- *   with the marker, so builds that do not know the type skip it on restore;
- * - envelope-less hosts (0.1.0-rc.6/rc.8, 0.1.1-rc.2, and 0.1.2-alpha.3,
- *   which fails closed on unknown types at read) get no append — the tool
- *   results remain the reconstructable audit trail. On 0.1.2-alpha.3 the envelope field is restored for stored-log read compatibility only - its Session.append still cannot stamp the marker, so the gate behavior is unchanged.
+ * - hosts observed to stamp the `ignorable` envelope (see
+ *   {@link probeMarkerSupport}) append with the marker, so builds that do not
+ *   know the type skip the event on restore;
+ * - every other host — envelope-less builds such as 0.1.0-rc.6/rc.8,
+ *   0.1.1-rc.2 and the 0.1.2-alpha line, which fails closed on unknown types at
+ *   read, and the 0.1.6-alpha.2 line, whose third append parameter is a
+ *   `SurfaceIntent` that exists only for surface-eligible types — gets no
+ *   append, with one visible warning instead of a silent skip; the tool
+ *   results remain the reconstructable audit trail.
  *
  * @module dsh-library/events
  */
@@ -62,30 +68,102 @@ export const INJECT_EVENT = 'library/inject' as const
 /** The purge audit event type. */
 export const PURGE_EVENT = 'library/purge' as const
 
-/** Loose append shape probed at runtime (envelope-less hosts take no options; pre-0.1.2 master builds took `ignorable`). */
-type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
+/** The observed marker capability of the mounted host. */
+export type MarkerSupport = 'unknown' | 'supported' | 'unsupported'
+
+/** The outcome of one audit append attempt. */
+export type AuditAppendOutcome = 'appended' | 'appended-marked' | 'skipped-unmarked-host'
 
 /**
- * Append one dsh-library audit event when the host can carry it safely; skip
- * silently otherwise (the `tool/call` + `tool/result` events remain the
- * model-visible log, so nothing model-visible is lost). See the module doc
- * for the three host classes.
+ * The host capability, decided by {@link probeMarkerSupport} at mount time and
+ * cached for the process (the append surface cannot change within one). Tests
+ * adopt a verdict explicitly through {@link adoptMarkerSupport}.
+ */
+let markerSupport: MarkerSupport = 'unknown'
+
+/** Whether the one-time skip notice has been emitted. */
+let warnedUnmarkedHost = false
+
+/** Adopt the probed verdict (called once by `apply`; tests inject it directly). */
+export function adoptMarkerSupport(verdict: MarkerSupport): void {
+  markerSupport = verdict
+  warnedUnmarkedHost = false
+}
+
+/**
+ * Observe whether this host stamps the `ignorable` envelope, by appending one
+ * audit event on a scratch session and reading the returned record back. The
+ * judgement is observed rather than inferred from an append implementation's
+ * source text (a source-text probe cannot see through a wrapper, a minifier or
+ * a future options bag), and it is safe: the scratch session is discarded, so
+ * an unmarked write there harms nothing.
+ *
+ * Folded context: `Session.append` optionally returns the appended record; a
+ * host that honours `{ ignorable: true }` returns it with `ignorable === true`,
+ * one that drops the options bag returns a record without the field, and a
+ * host that rejects the type outright throws — all three map to a verdict, and
+ * anything ambiguous or throwing fails closed to `'unsupported'`.
+ * @param createSession - builds the throwaway session to probe with.
+ * @returns the observed capability.
+ */
+export async function probeMarkerSupport(createSession: () => Session): Promise<MarkerSupport> {
+  try {
+    const session = createSession()
+    const append = session.append as AppendProbe
+    const record = append.call(session, INJECT_EVENT, {
+      injectId: 'probe',
+      library: 'probe',
+      query: 'probe',
+      chunks: [],
+      chars: 0,
+    }, { ignorable: true })
+    return isMarkedRecord(record) ? 'supported' : 'unsupported'
+  } catch {
+    return 'unsupported'
+  }
+}
+
+/** Loose append shape used by the probe and the marked path. */
+type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
+
+/** Whether a returned append record carries the stamped marker. */
+function isMarkedRecord(record: unknown): boolean {
+  return typeof record === 'object' && record !== null
+    && (record as { ignorable?: unknown }).ignorable === true
+}
+
+/**
+ * Append one dsh-library audit event when the host can carry it safely, and
+ * report what happened instead of skipping silently (the `tool/call` +
+ * `tool/result` events remain the model-visible log either way). The full rule
+ * set lives in the module doc; in short: known-vocabulary hosts append
+ * plainly, hosts observed to stamp the `ignorable` envelope append with the
+ * marker, and every other host gets no append plus one visible warning.
  * @param session - the calling session.
  * @param type - the audit event type.
  * @param data - the audit payload.
+ * @returns which branch ran.
  */
 export function appendAuditEvent(
   session: Session,
   type: typeof INJECT_EVENT | typeof PURGE_EVENT,
   data: LibraryInjectEvent | LibraryPurgeEvent,
-): void {
+): AuditAppendOutcome {
   if (KNOWN_SESSION_EVENT_TYPES.has(type)) {
     if (type === INJECT_EVENT) session.append(type, data as LibraryInjectEvent)
     else session.append(type, data as LibraryPurgeEvent)
-    return
+    return 'appended'
   }
-  const append = session.append as AppendProbe
-  if (Function.prototype.toString.call(append).includes('ignorable')) {
+  if (markerSupport === 'supported') {
+    const append = session.append as AppendProbe
     append.call(session, type, data, { ignorable: true })
+    return 'appended-marked'
   }
+  if (!warnedUnmarkedHost) {
+    warnedUnmarkedHost = true
+    console.warn(
+      'dsh-library: this host does not admit dsh-library audit events (its append surface cannot stamp the ignorable envelope and its vocabulary does not cover the type), so library/inject and library/purge are not written; the tool/call + tool/result events remain the audit trail',
+    )
+  }
+  return 'skipped-unmarked-host'
 }
