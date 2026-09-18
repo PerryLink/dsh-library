@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- The mount no longer loses its registrations when the fiber is disposed inside the dependency-resolution await: the storage-domain effect closes the handle with the fiber, and the tool/command registrations are skipped instead of throwing `INACTIVE_EFFECT` halfway through `apply`.
+
+- The audit gate now decides whether this host can carry `library/inject` / `library/purge` from an **observed** probe instead of an append implementation's source text. At mount the plugin appends one audit event on a throwaway session and reads the returned record back; a host that stamps `ignorable === true` gets the marked appends, and every other host (including the `0.1.6-alpha.2` line, whose third append parameter is a `SurfaceIntent` that exists only for surface-eligible types) gets no append **plus one visible warning** instead of a silent skip. The three branch semantics are unchanged; the probe fails closed to "unsupported" on any error, and the test contract injects the verdict explicitly.
+
+### Changed
+
+- Declare `dsh.manifestVersion: 1` and the canonical three-clause `engines.dsh` (G-3).
+- The CI workflow already runs both rulers (published peers + the alpha.2 checkout face with a freshness assertion); no change was needed there.
+
 ## [0.2.11] - 2026-09-12
 
 ### Changed
