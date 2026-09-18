@@ -27,7 +27,7 @@
 
 | Superfície | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.5-rc.2` (compatibilidade declarada para `0.1.5-rc.2`). Verificado em 2026-09-11 contra o checkout master do dsh-v0.1.5-rc.2 (cadeia de portas completa + smoke de instalação de profile). |
+| Harness | DeepSeek Harness `dsh-v0.1.6-alpha.2` (verificado em 2026-09-18: typecheck duplo + 89 testes + portas self-contained/artifacts; intervalo de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0`). Único pacote da família com smoke real de host alpha.2 (2026-09-11). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Armazenamento | Qualquer backend de storage-domain (JSON ou SQLite); o índice vive no domínio de armazenamento do host |
 | Modelos | Nenhum necessário — o embedder integrado é hash determinístico (zero downloads) |
