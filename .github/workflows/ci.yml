@@ -29,8 +29,13 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck (published 0.1.1-rc.2 peers)
+      - name: Typecheck (published peers)
         run: pnpm run typecheck:ci
+
+      - name: Typecheck against the alpha.2 checkout face
+        run: |
+          node scripts/assert-checkout-fresh.mjs
+          pnpm run typecheck
 
       - name: Test
         run: pnpm test
