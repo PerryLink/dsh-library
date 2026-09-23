@@ -23,6 +23,31 @@ import { defineDomain, type Domain, type KvTable } from '@deepseek-ai/dsh-storag
 import { z as zod } from 'zod'
 import type { FileSystem } from '@deepseek-ai/dsh-fs'
 import { MessageId, type UserMessage } from '@deepseek-ai/dsh-llm'
+import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+
+/**
+ * Producer-owned message attribution for the retrieval page this plugin
+ * injects.
+ *
+ * The harness's `MessageSourceMap` is a merge-extensible sum type: each
+ * producer declares its own `kind` in its own module, and the retired
+ * catch-all `{ kind: 'plugin', plugin }` shape no longer exists. It is gone
+ * from BOTH layers that used to accept it — the type layer
+ * (`packages/llm/llm/src/message.ts`) and the persistence layer
+ * (`session-format-v3-to-v4/src/message-sources.ts`), which refuses a physical
+ * row whose source `kind` is `'plugin'`, so a cast cannot smuggle one past
+ * admission. The host's own producers do exactly this (`tool-jobs` declares
+ * `{ kind: 'tool-jobs' } & ContextFormed`).
+ *
+ * Nothing in this package folds messages by source, so the retired spelling
+ * only has to stay LOADABLE, which the host's own V3→V4 migration guarantees.
+ */
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    /** This plugin's model-visible retrieval injection (the `library/inject` page). */
+    'dsh-library': { kind: 'dsh-library' } & ContextFormed
+  }
+}
 import type { SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { ToolRunContext } from '@deepseek-ai/dsh-tools'
@@ -801,7 +826,7 @@ function librarySearchTool(services: LibraryServices) {
           id: MessageId(`library-inject-${id}`),
           role: 'user',
           content: [{ type: 'text', text: `Library results for ${JSON.stringify(parsed.query)} (library ${parsed.library}, injectId ${id}):\n\n${page}` }],
-          source: { kind: 'plugin', plugin: 'dsh-library' },
+          source: { kind: 'dsh-library' },
         }
         exec.agent.inject(message)
         audit(exec, 'library/inject', {
