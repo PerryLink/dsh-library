@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.14] - 2026-09-23
+
+### Fixed
+
+- The session-log audit appends were unreachable on the `0.1.7` line: the host removed the `'plugin'` catch-all from `MessageSourceMap`, so `source: { kind: 'plugin', plugin }` no longer type-checked and the `library/inject` / `library/purge` events could not be written at all. This package now declares its **own** message-source kind (`'dsh-library'`) through a `declare module '@deepseek-ai/dsh-llm'` augmentation — the same producer-owned pattern the host's own plugins use — instead of borrowing the deleted catch-all.
+
+### Changed
+
+- Move the `@deepseek-ai/dsh-*` dev/test pins to `0.1.7-alpha.2` and re-verify both rulers against that line: `typecheck` resolves the local harness checkout, `typecheck:ci` the published `0.1.7-alpha.2` faces.
+- Every declared host range — `engines.dsh` and the nine `peerDependencies` bands — gains the `|| >=0.1.7-0 <0.2.0` arm, so the bands now admit the `0.1.7` prerelease line. Under semver's prerelease rule a range whose only prerelease comparators sit on earlier version tuples cannot admit a later alpha, so the previous three-arm form excluded the very host this release targets. No existing arm was removed or narrowed.
+- `dshWorkshop.compatibility.dshVersions` gains `0.1.7-alpha.2`, and all five READMEs name the verified line.
+- The compat workflow now installs the `0.1.7-alpha.2` host instead of `0.1.6-alpha.2`, so the scheduled end-to-end run exercises the line this package declares.
+
 ## [0.2.13] - 2026-09-19
 
 ### Added
