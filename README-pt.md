@@ -29,7 +29,7 @@
 
 | Superfície | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.7-alpha.2` (verificado em 2026-09-18: typecheck duplo + 89 testes + portas self-contained/artifacts; intervalo de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Único pacote da família com smoke real de host alpha.2 (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.1.7-rc.1` (verificado em 2026-09-24: typecheck duplo + 89 testes + portas self-contained/artifacts; intervalo de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Único pacote da família com smoke real de host alpha.2 (2026-09-11). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Armazenamento | Qualquer backend de storage-domain (JSON ou SQLite); o índice vive no domínio de armazenamento do host |
 | Modelos | Nenhum necessário — o embedder integrado é hash determinístico (zero downloads) |
@@ -146,7 +146,7 @@ Todos os ajustes são campos `Config` do Schemastery (alteráveis pelo cordis.ym
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests contra o checkout local do harness
-pnpm run typecheck:ci  # tsc contra os tipos publicados 0.1.7-alpha.2 (sem paths)
+pnpm run typecheck:ci  # tsc contra os tipos publicados 0.1.7-rc.1 (sem paths)
 pnpm test           # vitest: portas de qualidade, vocabulário núcleo, montagem com pilha real
 pnpm run build      # bundle tsdown + declarações tsc (lib/)
 pnpm run verify:self-contained  # especificações de dependências resolvem pelo registry
