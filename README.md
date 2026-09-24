@@ -38,7 +38,7 @@
 
 | Surface | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.7-rc.1` (verified 2026-09-24: dual typecheck rulers + 89 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.1.7-rc.2` (verified 2026-09-25: dual typecheck rulers + 89 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Storage | Any storage-domain backend (JSON or SQLite); the index lives in the host's storage domain |
 | Models | None required — the built-in embedder is deterministic hashing (zero downloads) |
@@ -155,7 +155,7 @@ All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests against the local harness checkout
-pnpm run typecheck:ci  # tsc against the published 0.1.7-rc.1 types (no paths)
+pnpm run typecheck:ci  # tsc against the published 0.1.7-rc.2 types (no paths)
 pnpm test           # vitest: quality ports, core vocabulary, real-stack assembly
 pnpm run build      # tsdown bundle + tsc declarations (lib/)
 pnpm run verify:self-contained  # dependency specs resolve from the registry

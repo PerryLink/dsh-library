@@ -36,7 +36,7 @@ Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryL
 
 | Superficie | Estado |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.7-rc.1` (verificado el 2026-09-24: doble typecheck + 89 pruebas + puertas self-contained/artifacts; rango de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Único paquete de la familia con un smoke real de host alpha.2 (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.1.7-rc.2` (verificado el 2026-09-25: doble typecheck + 89 pruebas + puertas self-contained/artifacts; rango de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Único paquete de la familia con un smoke real de host alpha.2 (2026-09-11). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Almacenamiento | Cualquier backend de storage-domain (JSON o SQLite); el índice vive en el dominio de almacenamiento del host |
 | Modelos | Ninguno requerido — el embedder integrado es hash determinista (cero descargas) |
@@ -153,7 +153,7 @@ Todos los ajustes son campos `Config` de Schemastery (modificables desde cordis.
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests contra el checkout local del harness
-pnpm run typecheck:ci  # tsc contra los tipos publicados 0.1.7-rc.1 (sin paths)
+pnpm run typecheck:ci  # tsc contra los tipos publicados 0.1.7-rc.2 (sin paths)
 pnpm test           # vitest: puertos de calidad, vocabulario núcleo, ensamblaje con pila real
 pnpm run build      # bundle tsdown + declaraciones tsc (lib/)
 pnpm run verify:self-contained  # las especificaciones de dependencias resuelven desde el registry

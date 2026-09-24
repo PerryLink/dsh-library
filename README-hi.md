@@ -36,7 +36,7 @@
 
 | सतह | स्थिति |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.1.7-rc.1` (2026-09-24 को सत्यापित: दोहरा typecheck + 89 टेस्ट + self-contained/artifacts गेट; peer रेंज `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`)। परिवार का एकमात्र पैकेज जिसका वास्तविक alpha.2 होस्ट स्मोक चला है (2026-09-11)। |
+| Harness | DeepSeek Harness `dsh-v0.1.7-rc.2` (2026-09-25 को सत्यापित: दोहरा typecheck + 89 टेस्ट + self-contained/artifacts गेट; peer रेंज `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`)। परिवार का एकमात्र पैकेज जिसका वास्तविक alpha.2 होस्ट स्मोक चला है (2026-09-11)। |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | भंडारण | कोई भी storage-domain बैकएंड (JSON या SQLite); सूचकांक होस्ट के भंडारण डोमेन में रहता है |
 | मॉडल | किसी की आवश्यकता नहीं — अंतर्निहित एम्बेडर नियतात्मक हैश है (शून्य डाउनलोड) |
@@ -153,7 +153,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 ```sh
 pnpm install        # node ^22.19 || >=24
 pnpm run typecheck  # tsc: src + tests स्थानीय हार्नेस चेकआउट के विरुद्ध
-pnpm run typecheck:ci  # tsc प्रकाशित 0.1.7-rc.1 प्रकारों के विरुद्ध (बिना paths)
+pnpm run typecheck:ci  # tsc प्रकाशित 0.1.7-rc.2 प्रकारों के विरुद्ध (बिना paths)
 pnpm test           # vitest: गुणवत्ता पोर्ट, मूल शब्दावली, वास्तविक-स्टैक संयोजन
 pnpm run build      # tsdown बंडल + tsc घोषणाएँ (lib/)
 pnpm run verify:self-contained  # निर्भरता स्पेक registry से हल होती हैं
