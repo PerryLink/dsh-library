@@ -34,6 +34,14 @@
 这个插件是 [DSH 插件家族](https://github.com/PerryLink)的一员（40+ 个，全部 Apache-2.0）。如果你在用，**给个 star** —— 它不会解锁任何功能，但会让下一个人在搜索里更容易找到它。
 
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
+## What is dsh-library?
+
+DeepSeek Harness 的本地文档知识库。
+
+导入、检索、核验 —— 带引用标记的混合检索，agent 可以自证引用。
+
+![dsh-library 终端演示：dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+
 ## 兼容性
 
 | 方面 | 状态 |
@@ -67,8 +75,12 @@
 ## 快速开始
 
 ```sh
+dsh plugin --profile web add github:PerryLink/dsh-library
+```
+
+```sh
 # 1. 把 bundle 装进你的 profile
-dsh plugin --profile web add "github:PerryLink/dsh-library#main"
+dsh plugin --profile web add github:PerryLink/dsh-library
 
 # 或从 npm 安装（正式发布版）
 dsh plugin --profile web add dsh-library
@@ -85,7 +97,7 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 
 ## 安装与卸载
 
-- **git 通道**（最新 `main`）：`dsh plugin --profile web add "github:PerryLink/dsh-library#main"` —— `prepare` 脚本仅用生产依赖构建。
+- **git 通道**（最新 `main`）：`dsh plugin --profile web add github:PerryLink/dsh-library` —— `prepare` 脚本仅用生产依赖构建。
 - **npm 通道**（正式发布版）：`dsh plugin --profile web add dsh-library`。
 - **tarball 通道**：在本仓库执行 `pnpm pack`，然后 `dsh plugin --profile web add ./dsh-library-<version>.tgz`。
 - **卸载**：`dsh plugin --profile web remove dsh-library`（或从 profile patch 中删除该行）。

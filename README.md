@@ -36,6 +36,14 @@
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
 
 
+## What is dsh-library?
+
+Local document knowledge base for DeepSeek Harness.
+
+Import, retrieve, verify — hybrid search with citations your agent can check.
+
+![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+
 ## Compatibility
 
 | Surface | Status |
@@ -69,8 +77,12 @@ query ── library_search ─▶ hybrid score ─▶ MMR re-rank ─▶ releva
 ## Quick start
 
 ```sh
+dsh plugin --profile web add github:PerryLink/dsh-library
+```
+
+```sh
 # 1. install the bundle into your profile
-dsh plugin --profile web add "github:PerryLink/dsh-library#main"
+dsh plugin --profile web add github:PerryLink/dsh-library
 
 # or from npm (published releases)
 dsh plugin --profile web add dsh-library
@@ -87,7 +99,7 @@ Then ask the agent to import and use a document:
 
 ## Install & uninstall
 
-- **git channel** (latest `main`): `dsh plugin --profile web add "github:PerryLink/dsh-library#main"` — the `prepare` script builds with production dependencies only.
+- **git channel** (latest `main`): `dsh plugin --profile web add github:PerryLink/dsh-library` — the `prepare` script builds with production dependencies only.
 - **npm channel** (published releases): `dsh plugin --profile web add dsh-library`.
 - **tarball channel**: `pnpm pack` in this repo, then `dsh plugin --profile web add ./dsh-library-<version>.tgz`.
 - **uninstall**: `dsh plugin --profile web remove dsh-library` (or remove the row from the profile patch).
