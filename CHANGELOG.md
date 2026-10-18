@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.23] - 2026-10-18
+
+### Changed
+
+- Add a 1280×720 hero and a 960×540, 4-second terminal GIF rendered from the test run; `screenshots.json` is an object array and `capture.json` records the command.
+
+## [0.2.22] - 2026-10-18
+
+### Fixed
+
+- **Concurrent `library_add` calls no longer lose chunks.** Imports are serialized per runtime: the storage domain publishes the whole unit on each put, so two adds of one library could rewrite it from different snapshots (issue #11, plugin-side mitigation).
+
+## [0.2.21] - 2026-10-17
+
+### Fixed
+
+- **Search cuts to `k` before the lost-in-the-middle reorder (issue #10).** The reorder ran over every candidate above `minRelevance`, then the result loop took `k`; the second-best hit was moved past the budget and silently dropped. The reorder now operates only on the top-`k` window.
+- **Cyrillic/Greek inflection stems (issue #9).** `cjkTokenize` adds 3-5 character prefixes for non-Han Cyrillic/Greek runs, so `документов` overlaps `документ`; Latin and CJK tokenization is unchanged.
+- Compatibility: `engines.dsh` -> `>=0.2.1-0 <0.3.0`; devDependencies to `0.2.1-rc.2`; add `@deepseek-ai/dsh-working-directory`.
+
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

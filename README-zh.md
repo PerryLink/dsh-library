@@ -41,7 +41,7 @@ DeepSeek Harness 的本地文档知识库。
 
 导入、检索、核验 —— 带引用标记的混合检索，agent 可以自证引用。
 
-![dsh-library 终端演示：dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+![dsh-library 终端演示：dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
 
 ![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
 

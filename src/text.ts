@@ -47,6 +47,11 @@ export function cjkTokenize(text: string): string[] {
       for (let index = 0; index < run.length - 1; index += 1) tokens.push(run.slice(index, index + 2))
     } else {
       tokens.push(run)
+      // Inflected Cyrillic/Greek runs: add 3-5 character stems so документов
+      // and документ overlap without changing Latin/CJK scores (issue #9).
+      if (run.length >= 6 && /[\u0400-\u04ff\u0370-\u03ff]/u.test(run)) {
+        for (let length = 3; length <= 5; length += 1) tokens.push(run.slice(0, length))
+      }
     }
   }
   return tokens

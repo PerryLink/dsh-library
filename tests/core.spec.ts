@@ -118,3 +118,8 @@ describe('domain spec', () => {
     expect(Object.keys(libraryDomainSpec.tables).sort()).toEqual(['chunks', 'documents', 'purges'])
   })
 })
+
+  it('adds Cyrillic stems without changing Latin tokens', () => {
+    expect(cjkTokenize('документов')).toEqual(expect.arrayContaining(['документов', 'док', 'доку', 'докум']))
+    expect(cjkTokenize('Hello 世界')).toEqual(['hello', '世', '界', '世界'])
+  })

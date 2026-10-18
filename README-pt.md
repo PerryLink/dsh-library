@@ -41,7 +41,7 @@ Base de conhecimento local de documentos para o DeepSeek Harness.
 
 Importe, recupere, verifique — busca híbrida com citações que seu agente pode conferir.
 
-![Demonstração de terminal do dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+![Demonstração de terminal do dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
 
 ![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
 

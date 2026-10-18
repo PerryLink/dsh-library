@@ -222,3 +222,7 @@ describe('embedding helpers', () => {
     expect(cosine(a, embedHash('quantum physics and cosmology', 64))).toBeLessThan(0.9)
   })
 })
+
+  it('scores an inflected Russian query against its stem (issue #9)', () => {
+    expect(scoreRelevance('документов', 'документ')).toBeGreaterThan(0.7)
+  })

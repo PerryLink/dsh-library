@@ -1,5 +1,14 @@
-{
-  "screenshots": [
-    "docs/assets/dsh-library-demo.png"
-  ]
-}
+[
+  {
+    "path": "docs/assets/dsh-library-hero.png",
+    "kind": "hero",
+    "alt": "dsh-library terminal output",
+    "caption": "Real dsh-library test run; 91 tests passed."
+  },
+  {
+    "path": "docs/assets/dsh-library-demo.gif",
+    "kind": "demo",
+    "alt": "Animated dsh-library terminal session",
+    "caption": "The same run, assembled line by line."
+  }
+]

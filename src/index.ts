@@ -251,6 +251,9 @@ const MAX_CANDIDATE_BOUND = 500
  * durable boundary; this class never logs text or embeddings.
  */
 export class LibraryStore {
+  /** Serializes imports so one library's unit is never rewritten concurrently. */
+  private addQueue: Promise<void> = Promise.resolve()
+
   private readonly documents: KvTable<string, DocumentRecord>
   private readonly chunks: KvTable<string, ChunkRecord>
   private readonly purges: KvTable<string, PurgeRecord>
@@ -283,6 +286,22 @@ export class LibraryStore {
    * @returns the add summary.
    */
   async add(library: string, docName: string, content: string): Promise<LibraryAddResult> {
+    // Serialize adds: the storage domain publishes a whole unit on every put, so
+    // concurrent imports of the same library otherwise rewrite the same file
+    // from different snapshots and lose chunks. The queue is per runtime.
+    const previous = this.addQueue
+    let release!: () => void
+    this.addQueue = new Promise<void>((resolve) => { release = resolve })
+    await previous
+    try {
+      return await this.addUnlocked(library, docName, content)
+    } finally {
+      release()
+    }
+  }
+
+  /** The unsynchronized import body; callers go through {@link add}. */
+  private async addUnlocked(library: string, docName: string, content: string): Promise<LibraryAddResult> {
     const trimmedLibrary = assertLibraryName(library)
     const bytes = Buffer.byteLength(content, 'utf8')
     if (bytes > this.config.maxFileBytes) {
@@ -413,8 +432,13 @@ export class LibraryStore {
     const filtered = reranked
       .filter(entry => entry.relevance >= this.config.search.minRelevance)
       .slice(0, 500)
+    // Cut to k BEFORE the lost-in-the-middle reorder. Reordering the whole
+    // candidate set and only then walking k moved the second-best hit past the
+    // budget and dropped it (issue #10); the reorder is a display concern and
+    // must act on the window the user will actually see.
+    const windowed = filtered.slice(0, Math.max(1, k))
     const reordered = avoidLostMiddle(
-      filtered.map(entry => ({ id: entry.chunk.chunkId, score: entry.relevance })),
+      windowed.map(entry => ({ id: entry.chunk.chunkId, score: entry.relevance })),
       this.config.search.lostMiddleHead,
       this.config.search.lostMiddleTail,
     )

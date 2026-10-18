@@ -42,7 +42,7 @@ Local document knowledge base for DeepSeek Harness.
 
 Import, retrieve, verify — hybrid search with citations your agent can check.
 
-![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
 
 ![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
 

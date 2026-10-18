@@ -41,7 +41,7 @@ DeepSeek Harness के लिए स्थानीय दस्तावेज
 
 आयात करें, पुनर्प्राप्त करें, सत्यापित करें — उद्धरण-युक्त हाइब्रिड खोज जिसे आपका एजेंट जाँच सकता है।
 
-![dsh-library का टर्मिनल डेमो: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.png)
+![dsh-library का टर्मिनल डेमो: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
 
 ![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
 
