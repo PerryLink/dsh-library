@@ -302,7 +302,9 @@ pnpm pack           # 发布用 tarball
 
 </details>
 
-</details>## License
+</details>
+
+## License
 
 [Apache License 2.0](LICENSE) © 2026 dsh-library contributors
 

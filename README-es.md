@@ -302,7 +302,9 @@ Este proyecto es uno de los **87 plugins activamente mantenidos** de DeepSeek Ha
 
 </details>
 
-</details>## License
+</details>
+
+## License
 
 [Apache License 2.0](LICENSE) © 2026 dsh-library contributors
 
