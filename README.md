@@ -138,6 +138,22 @@ Library docs: 2 result(s) for "what is the harness built on"
 
 *Observed from `README.md:161-167; tests/index.spec.ts:46-64; src/index.ts:830-836`*
 
+#### Failure branch
+
+**Input**
+
+~~~text
+{"path":"/nonexistent/dsh-library-missing.txt","library":"docs"}
+~~~
+
+**Output**
+
+~~~text
+isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": not found; error.info={"name":"FsError","code":"FS_NOT_FOUND"}
+~~~
+
+*Observed from `plugins/dsh-library/src/index.ts:695-696 (fs.resolve/readText); plugins/dsh-library/tests/index.spec.ts:143-151 (unreadable path); plugins/dsh-library/README.md:195 (unreadable files fail loud); exercised through plugins/dsh-library/tests/harness.ts`*
+
 #### Brief examples
 
 - `library_search`
