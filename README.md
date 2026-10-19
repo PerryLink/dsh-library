@@ -122,7 +122,21 @@ These are the plugin's real entry points; install once, then call one.
 
 #### Detailed example
 
-- `library_add`
+**Command**
+
+~~~sh
+library_search({ library: "docs", query: "what is the harness built on", inject: true })
+~~~
+
+**Output**
+
+~~~text
+Library docs: 2 result(s) for "what is the harness built on"
+[1] DeepSeek Harness is a plugin-based agent harness built on vendored Cordis. Everything in the harness is a plugin row inside a cordis.yml composition. The tools/pre-execute waterfall lets plugins gate…
+[2] The recipe for sourdough starts with a levain fed the night before. Bulk fermentation takes four to six hours at room temperature. Bake in a dutch oven at 230 degrees Celsius for the first twenty min…
+~~~
+
+*Observed from `README.md:161-167; tests/index.spec.ts:46-64; src/index.ts:830-836`*
 
 #### Brief examples
 

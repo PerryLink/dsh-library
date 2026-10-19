@@ -122,7 +122,21 @@ São os pontos de entrada reais; instale e chame um.
 
 #### Exemplo detalhado
 
-- `library_add`
+**Comando**
+
+~~~sh
+library_search({ library: "docs", query: "what is the harness built on", inject: true })
+~~~
+
+**Saída**
+
+~~~text
+Library docs: 2 result(s) for "what is the harness built on"
+[1] DeepSeek Harness is a plugin-based agent harness built on vendored Cordis. Everything in the harness is a plugin row inside a cordis.yml composition. The tools/pre-execute waterfall lets plugins gate…
+[2] The recipe for sourdough starts with a levain fed the night before. Bulk fermentation takes four to six hours at room temperature. Bake in a dutch oven at 230 degrees Celsius for the first twenty min…
+~~~
+
+*Observado em `README.md:161-167; tests/index.spec.ts:46-64; src/index.ts:830-836`*
 
 #### Exemplos breves
 
