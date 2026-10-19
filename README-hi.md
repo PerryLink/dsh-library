@@ -55,9 +55,11 @@ DeepSeek Harness के लिए स्थानीय दस्तावेज
 
 आयात करें, पुनर्प्राप्त करें, सत्यापित करें — उद्धरण-युक्त हाइब्रिड खोज जिसे आपका एजेंट जाँच सकता है।
 
-![dsh-library का टर्मिनल डेमो: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
+![dsh-library का टर्मिनल डेमो: dsh-library — install, then ask with [n] citations](docs/assets/dsh-library-flow.svg)
 
-![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
+![dsh-library कार्यप्रवाह आरेख: इंस्टॉल → पैनल खोलें → कार्य।](docs/assets/dsh-library-flow.svg)
+
+*कार्यप्रवाह: इंस्टॉल → पैनल खोलें → कार्य। नीचे के उदाहरण वास्तविक कमांड सतह का उपयोग करते हैं।*
 
 *वही रन, एनिमेटेड।*
 
@@ -113,6 +115,19 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 ```
 > ./docs/spec.md को docs पुस्तकालय में जोड़ें, फिर उत्तर दें: spec रिट्राई के बारे में क्या कहती है? [n] चिह्नों से उद्धृत करें।
 ```
+
+### उदाहरण
+
+ये वास्तविक प्रवेश बिंदु हैं; इंस्टॉल के बाद एक चलाएँ।
+
+#### विस्तृत उदाहरण
+
+- `library_add`
+
+#### संक्षिप्त उदाहरण
+
+- `library_search`
+- `library_list`
 
 ## कॉन्फ़िगरेशन
 

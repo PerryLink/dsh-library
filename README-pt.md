@@ -55,9 +55,11 @@ Base de conhecimento local de documentos para o DeepSeek Harness.
 
 Importe, recupere, verifique — busca híbrida com citações que seu agente pode conferir.
 
-![Demonstração de terminal do dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
+![Demonstração de terminal do dsh-library: dsh-library — install, then ask with [n] citations](docs/assets/dsh-library-flow.svg)
 
-![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
+![Diagrama de fluxo de dsh-library: instalar → abrir painel → agir.](docs/assets/dsh-library-flow.svg)
+
+*Visão geral do fluxo: instalar → abrir painel → agir. Os exemplos abaixo usam a superfície real de comandos.*
 
 *A mesma execução, animada.*
 
@@ -113,6 +115,19 @@ Depois peça ao agente para importar e usar um documento:
 ```
 > Adicione ./docs/spec.md à biblioteca docs e responda: o que a spec diz sobre retries? Cite com marcadores [n].
 ```
+
+### Exemplos
+
+São os pontos de entrada reais; instale e chame um.
+
+#### Exemplo detalhado
+
+- `library_add`
+
+#### Exemplos breves
+
+- `library_search`
+- `library_list`
 
 ## Configuração
 

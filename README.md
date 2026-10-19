@@ -56,11 +56,12 @@ Local document knowledge base for DeepSeek Harness.
 
 Import, retrieve, verify — hybrid search with citations your agent can check.
 
-![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
+![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](docs/assets/dsh-library-flow.svg)
 
-![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
+![Workflow diagram for dsh-library: install → open panel → act.](docs/assets/dsh-library-flow.svg)
 
-*The same run, animated.*
+*Workflow overview: install → open panel → act. The examples below use the real command surface.*
+
 
 ## Compatibility
 
@@ -114,6 +115,19 @@ Then ask the agent to import and use a document:
 ```
 > Add ./docs/spec.md to library docs, then answer: what does the spec say about retries? Cite [n] markers.
 ```
+
+### Examples
+
+These are the plugin's real entry points; install once, then call one.
+
+#### Detailed example
+
+- `library_add`
+
+#### Brief examples
+
+- `library_search`
+- `library_list`
 
 ## Configuration
 

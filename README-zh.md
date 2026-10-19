@@ -46,9 +46,11 @@ DeepSeek Harness 的本地文档知识库。
 
 导入、检索、核验 —— 带引用标记的混合检索，agent 可以自证引用。
 
-![dsh-library 终端演示：dsh-library — install, then ask with [n] citations](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-hero.png)
+![dsh-library 终端演示：dsh-library — install, then ask with [n] citations](docs/assets/dsh-library-flow.svg)
 
-![Animated terminal demo of dsh-library](https://raw.githubusercontent.com/PerryLink/dsh-library/main/docs/assets/dsh-library-demo.gif)
+![dsh-library 工作流图：安装 → 打开面板 → 操作。](docs/assets/dsh-library-flow.svg)
+
+*工作流概览：安装 → 打开面板 → 操作。下面的示例使用实际命令面。*
 
 *同一次运行，动图版。*
 
@@ -113,6 +115,19 @@ dsh --profile web --dump-config | grep -A2 'id: dsh-library'
 - **卸载**：`dsh plugin --profile web remove dsh-library`（或从 profile patch 中删除该行）。
 
 > 如果 pnpm 对本包报 `ERR_PNPM_IGNORED_BUILDS`（esbuild 的平台二进制无害校验），在你的 `pnpm-workspace.yaml` 中加入 `allowBuilds: { esbuild: true }` —— `dsh` CLI 会打印确切片段。
+
+### 示例
+
+以下为插件真实入口；安装后调用一个即可。
+
+#### 详细示例
+
+- `library_add`
+
+#### 简短示例
+
+- `library_search`
+- `library_list`
 
 ## 配置
 
