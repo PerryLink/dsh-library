@@ -1,7 +1,7 @@
 {
   "name": "dsh-library",
-  "version": "0.2.24",
-  "description": "Local document knowledge base for DeepSeek Harness: library_add/remove/list, hybrid semantic+keyword library_search with diversity re-ranking, relevance filtering and lost-in-the-middle avoidance, citation-aware injection, library_cite_check and library_diagnose —SQLite-backed index via the storage domain, local embedding, zero model downloads",
+  "version": "0.2.25",
+  "description": "Local document knowledge base for DeepSeek Harness: library_add/remove/list, hybrid semantic+keyword library_search with diversity re-ranking, relevance filtering and lost-in-the-middle avoidance, citation-aware injection, library_cite_check and library_diagnose \u2014SQLite-backed index via the storage domain, local embedding, zero model downloads",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PerryLink/dsh-library.git"
@@ -122,7 +122,7 @@
     "@deepseek-ai/schemastery": "^3.18.5-alpha.2"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-attachment": "0.2.1-rc.2",
