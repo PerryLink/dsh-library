@@ -20,6 +20,7 @@ import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
 import * as StorageJson from '@deepseek-ai/dsh-storage-json'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import type { ToolExecutionResult } from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import { CallId } from './call-id.ts'
 
 /** Everything a mounted harness hands back to a test. */
@@ -69,6 +70,8 @@ export async function mountHarness(config: Record<string, unknown> = {}): Promis
   session.append('turn/start', { turn: 1 })
   ctx.provide('systemPrompt', { tools: () => () => undefined, section: () => () => undefined } as never)
   await ctx.plugin(ToolRuntime)
+  // 0.2.2: raw batch execution lives behind a pluggable executor.
+  await ctx.plugin(NativeToolExecutor as unknown as import('@deepseek-ai/cordis').Plugin)
 
   const plugin = await import('../src/index.ts')
   const pluginFiber = await ctx.plugin(plugin as unknown as import('@deepseek-ai/cordis').Plugin, config)
@@ -87,13 +90,20 @@ let callCounter = 0
 /** Execute one tool through the real registry pipeline. */
 export async function callTool(harness: Harness, name: string, args: unknown): Promise<ToolExecutionResult> {
   callCounter += 1
-  return harness.ctx.tools.execute({
-    callId: CallId(`library-spec-${callCounter}`),
-    name,
-    arguments: args,
+  // 0.2.2: execute() takes a whole batch and settles one result per call.
+  const batch = await harness.ctx.tools.execute({
+    calls: [{
+      type: 'tool-call',
+      id: CallId(`library-spec-${callCounter}`),
+      name,
+      arguments: JSON.stringify(args),
+    }],
     agent: harness.agent,
     signal: new AbortController().signal,
   })
+  const outcome = batch.results[0]
+  if (outcome === undefined) throw new Error(`tool executor settled no result for ${name}`)
+  return outcome.result
 }
 
 /** The MessageId brand factory for injection assertions. */

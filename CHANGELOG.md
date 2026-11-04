@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **Host 0.2.2 line support.** devDependencies move from 0.2.1-rc.2 to 0.2.2-rc.1, cordis to 4.1.0 / cordis-plugin-include 1.1.0 / cordis-plugin-loader 1.1.0, and schemastery to ~3.19.0 so a single copy resolves against `@deepseek-ai/dsh-llm` 0.2.2. Add `@deepseek-ai/dsh-package-manifest` (dsh-llm 0.2.2's published types import it but its manifest does not declare it). `engines.dsh` appends `>=0.2.2-0 <0.3.0` (append-only) and `engines.node` becomes `^22.19.0 || >=24.9.0`.
+- Add `@deepseek-ai/dsh-tool-executor-native` and mount it in the test harness: 0.2.2 moved raw batch execution behind a pluggable executor.
+
+### Fixed
+
+- Test harness `callTool` uses the 0.2.2 batch `ctx.tools.execute` shape (`calls: [{ type, id, name, arguments: JSON.stringify(...) }]`) and reads the settled `results[0].result` instead of the removed single-call parameter bag.
+
 ## [0.2.25] - 2026-10-24
 
 ### Fixed
