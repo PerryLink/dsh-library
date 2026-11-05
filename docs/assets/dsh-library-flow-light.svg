@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-label="dsh-library pipeline">
+<title>dsh-library pipeline</title>
+<rect width="1200" height="500" rx="18" fill="#ffffff"/>
+<text x="60" y="62" fill="#1f2328" font-family="ui-sans-serif,system-ui,sans-serif" font-size="30" font-weight="700">dsh-library</text>
+<text x="60" y="94" fill="#57606a" font-family="ui-monospace,monospace" font-size="15">library_add · library_remove · library_list · library_search · library_cite_check · library_diagnose</text>
+<line x1="60" y1="116" x2="1140" y2="116" stroke="#d0d7de"/>
+<rect x="60" y="140" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="180" y="174" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">library_add</text>
+<text x="180" y="200" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">{ path, library }</text>
+<path d="M304 182h26" stroke="#57606a" stroke-width="3"/>
+<path d="M328 175l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="340" y="140" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#4B67B4" stroke-width="2"/>
+<text x="460" y="174" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">chunkSize 900</text>
+<text x="460" y="200" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">chunkOverlap 120</text>
+<path d="M584 182h26" stroke="#57606a" stroke-width="3"/>
+<path d="M608 175l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="620" y="140" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="740" y="174" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">embedding.provider</text>
+<text x="740" y="200" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">hash · dims 256</text>
+<path d="M864 182h26" stroke="#57606a" stroke-width="3"/>
+<path d="M888 175l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="900" y="140" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#4B67B4" stroke-width="2"/>
+<text x="1020" y="174" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">dsh_library</text>
+<text x="1020" y="200" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">documents · chunks · purges</text>
+<rect x="60" y="260" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="180" y="294" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">library_search</text>
+<text x="180" y="320" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">{ query, library }</text>
+<path d="M304 302h26" stroke="#57606a" stroke-width="3"/>
+<path d="M328 295l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="340" y="260" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#4B67B4" stroke-width="2"/>
+<text x="460" y="294" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">hybridWeight 0.6</text>
+<text x="460" y="320" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">minRelevance 0.15</text>
+<path d="M584 302h26" stroke="#57606a" stroke-width="3"/>
+<path d="M608 295l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="620" y="260" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#4B67B4" stroke-width="2"/>
+<text x="740" y="294" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">diversityLambda 0.5</text>
+<text x="740" y="320" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">lostMiddleHead/Tail 1</text>
+<path d="M864 302h26" stroke="#57606a" stroke-width="3"/>
+<path d="M888 295l10 7-10 7" fill="none" stroke="#57606a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="900" y="260" width="240" height="84" rx="14" fill="#f6f8fa" stroke="#16a34a" stroke-width="2"/>
+<text x="1020" y="294" fill="#1f2328" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="700">[n] result page</text>
+<text x="1020" y="320" fill="#57606a" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12">inject: true</text>
+<rect x="60" y="380" width="520" height="56" rx="12" fill="#f6f8fa" stroke="#bc4c00" stroke-width="2"/>
+<text x="84" y="406" fill="#1f2328" font-family="ui-monospace,monospace" font-size="14" font-weight="700">library_cite_check</text>
+<text x="84" y="425" fill="#57606a" font-family="ui-monospace,monospace" font-size="12">citation.minScore 40 · minSemantic 0.1</text>
+<rect x="620" y="380" width="520" height="56" rx="12" fill="#f6f8fa" stroke="#bc4c00" stroke-width="2"/>
+<text x="644" y="406" fill="#1f2328" font-family="ui-monospace,monospace" font-size="14" font-weight="700">library_remove</text>
+<text x="644" y="425" fill="#57606a" font-family="ui-monospace,monospace" font-size="12">purge.maxProbes 24 · signatureLength 4</text>
+<text x="60" y="474" fill="#57606a" font-family="ui-monospace,monospace" font-size="13">library/inject · library/purge — host-gated audit events</text>
+</svg>

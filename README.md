@@ -1,134 +1,127 @@
 <div align="center">
 
-# 📚 dsh-library
-- **1024 store channel**: `npm i -g dsh1024` once, then `dsh1024 plugin --profile web add dsh-library` (counts toward the [deepseek1024.com](https://deepseek1024.com) install ranking).
-[![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/dsh-library)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-dark.svg">
+  <img src="docs/assets/dsh-library-flow-light.svg" width="100%" alt="dsh-library 管线：library_add → 滑窗切片 → 本地嵌入 → dsh_library 存储域；library_search → 混合打分 → MMR 重排 → 相关性过滤 → 带 [n] 标记的结果页 → inject；library_cite_check 与 library_remove 清除验证">
+</picture>
+
+# dsh-library
+
+**把本地 md/txt 文档变成带引用编号、可逐条核验的检索库。**
+
+面向 DeepSeek Harness 的本地文档知识库：按路径导入、滑窗切片、本地嵌入，混合检索返回带 `[n]` 标记的结果页，引用和删除都有可验证的落点。
+
+[安装](#三步上手) · [配置](#配置) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+
+[![License](https://img.shields.io/badge/license-Apache--2.0-3366CC?style=flat-square&labelColor=2B3245)](LICENSE)
+[![DSH](https://img.shields.io/badge/DSH-%E2%89%A50.2.1%20%3C0.3.0-4B67B4?style=flat-square&labelColor=2B3245)](#兼容性)
+[![npm](https://img.shields.io/npm/v/dsh-library?style=flat-square&labelColor=2B3245&color=CB3837)](https://www.npmjs.com/package/dsh-library)
+[![CI](https://img.shields.io/github/actions/workflow/status/PerryLink/dsh-library/ci.yml?branch=main&label=CI&style=flat-square&labelColor=2B3245)](https://github.com/PerryLink/dsh-library/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%5E22.19%20%7C%7C%20%3E%3D24.9-339933?style=flat-square&labelColor=2B3245)](#兼容性)
+
+[![Stars](https://img.shields.io/github/stars/PerryLink/dsh-library?style=flat-square&labelColor=2B3245)](https://github.com/PerryLink/dsh-library/stargazers)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-library?style=flat-square&labelColor=2B3245&color=CB3837)](https://www.npmjs.com/package/dsh-library)
 [![dshfind](https://dshfind.com/api/badge/PerryLink/dsh-library?metric=downloads)](https://dshfind.com/plugins/PerryLink/dsh-library?ref=badge)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PerryLink/dsh-library/badge)](https://api.securityscorecards.dev/projects/github.com/PerryLink/dsh-library)
-
-**Local document knowledge base for DeepSeek Harness.**
-
-*Import, retrieve, verify — hybrid search with citations your agent can check.*
-
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![DSH plugin](https://img.shields.io/badge/dsh--plugin-✅-green)](https://github.com/topics/dsh-plugin)
-[![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-library.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
-[![DSH Market](https://raw.githubusercontent.com/2BingLing/dsh-market/master/assets/readme/badge-listed-en.svg)](https://dsh.market/)
-[![Node](https://img.shields.io/badge/node-%5E22.19%20%7C%7C%20%3E%3D24-brightgreen.svg)](#)
-[![CI](https://img.shields.io/github/actions/workflow/status/PerryLink/dsh-library/ci.yml?branch=main&label=CI)](https://github.com/PerryLink/dsh-library/actions)
-[![Version](https://img.shields.io/github/v/tag/PerryLink/dsh-library?label=version)](https://github.com/PerryLink/dsh-library/releases)
-[![npm version](https://img.shields.io/npm/v/dsh-library)](https://www.npmjs.com/package/dsh-library)
-[![npm downloads](https://img.shields.io/npm/dm/dsh-library)](https://www.npmjs.com/package/dsh-library)
-
-[English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PerryLink/dsh-library/badge)](https://securityscorecards.dev/viewer/?uri=github.com/PerryLink/dsh-library)
+[![DSH Market](https://img.shields.io/badge/DSH_Market-listed-4B67B4?style=flat-square&labelColor=2B3245)](https://dsh.market/)
+[![Gitee](https://img.shields.io/badge/Gitee-mirror-C71D23?style=flat-square&labelColor=2B3245&logo=gitee)](https://gitee.com/perrylink/dsh-library)
 
 ```sh
 dsh plugin --profile <name> add dsh-library
 ```
 
-
 </div>
 
----
+<sub>社区插件，与 DeepSeek 官方无关。唯一仓库：<https://github.com/PerryLink/dsh-library>（Gitee 为镜像）。</sub>
 
-**📖 Ecosystem knowledge base** — measured data, not marketing: [plugin development guide · plugin-selection data · maintenance criteria](https://perrylink.github.io/dsh-plugin-guide/).
+## 它是什么
 
-<!-- star-cta -->
-## Install & uninstall
+`dsh-library` 把你的 md/txt 文档变成 agent 可查询的本地知识库。`library_add` 按路径读入文档、做滑窗切片并写入宿主的 `dsh_library` 存储域；`library_search` 用语义 + 关键词混合打分、MMR 多样性重排、相关性过滤与中段规避，返回带 `[n]` 来源标记的结果页。引用可以用 `library_cite_check` 逐条核验，删除可以用 `library_remove` 的清除验证探针复查残留。默认零模型下载、零网络请求——打分是确定性哈希与词法数学。
 
-- **git channel** (latest `main`): `dsh plugin --profile web add github:PerryLink/dsh-library` — the `prepare` script builds with production dependencies only.
-- **npm channel** (published releases): `dsh plugin --profile web add dsh-library`.
-- **tarball channel**: `pnpm pack` in this repo, then `dsh plugin --profile web add ./dsh-library-<version>.tgz`.
-- **uninstall**: `dsh plugin --profile web remove dsh-library` (or remove the row from the profile patch).
+## 三步上手
 
-> If pnpm reports `ERR_PNPM_IGNORED_BUILDS` for this package (esbuild's harmless platform-binary validation), add `allowBuilds: { esbuild: true }` to your `pnpm-workspace.yaml` — the `dsh` CLI prints the exact snippet.
+1. **安装**（三选一）：
 
-## ⭐ 如果它帮到了你
+   ```sh
+   # git 通道（最新 main）——prepare 脚本仅用生产依赖构建
+   dsh plugin --profile web add github:PerryLink/dsh-library
+   # npm 通道（已发布版本）
+   dsh plugin --profile web add dsh-library
+   # tarball 通道：在本仓库 pnpm pack 后
+   dsh plugin --profile web add ./dsh-library-<version>.tgz
+   ```
 
-这个插件是 [DSH 插件家族](https://github.com/PerryLink)的一员（95 个，全部 Apache-2.0）。如果你在用，**给个 star** —— 它不会解锁任何功能，但会让下一个人在搜索里更容易找到它。
+   > 如果 pnpm 对本包报 `ERR_PNPM_IGNORED_BUILDS`（esbuild 平台二进制文件的无害校验），在 `pnpm-workspace.yaml` 中加入 `allowBuilds: { esbuild: true }`——`dsh` CLI 会打印确切片段。
 
-*English:* part of a 95 plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
+2. **最小配置**：默认值即可跑——bundle patch 会自动插入 `dsh-library` 行，索引写进宿主的 `dsh_library` 存储域（JSON 或 SQLite 后端均可）。只有要改检索口味时才需要覆盖配置，见「配置」。
 
+3. **验证已生效**：
 
-## What is dsh-library?
+   ```sh
+   dsh --profile web --dump-config | grep -A2 'id: dsh-library'
+   ```
 
-Local document knowledge base for DeepSeek Harness.
+   然后让 agent 导入第一篇文档并提问：
 
-Import, retrieve, verify — hybrid search with citations your agent can check.
+   ```text
+   > 把 ./docs/spec.md 加入 docs 知识库，然后回答：规范里关于重试是怎么说的？用 [n] 标记引用。
+   ```
 
-![Terminal demo of dsh-library: dsh-library — install, then ask with [n] citations](docs/assets/dsh-library-flow.svg)
+**卸载**：`dsh plugin --profile web remove dsh-library`（或从 profile patch 删掉该行）。
 
-![Workflow diagram for dsh-library: install → open panel → act.](docs/assets/dsh-library-flow.svg)
+<details>
+<summary>从 DSH Desktop 市场安装</summary>
 
-*Workflow overview: install → open panel → act. The examples below use the real command surface.*
+所有 PerryLink 插件均可在 DSH Desktop 内置市场中浏览：**市场 → 来源 → 添加来源 → 粘贴** `https://perrylink-dsh-catalog.perrylink.workers.dev/catalog-source.json` **→ 选中**。安装仍需通过市场的 npm 身份校验与你的确认。
 
+</details>
 
-## Compatibility
+## 核心能力
 
-| Surface | Status |
-|---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (verified 2026-09-25: dual typecheck rulers + 89 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
-| Node | `^22.19.0 \|\| >=24.0.0` |
-| Storage | Any storage-domain backend (JSON or SQLite); the index lives in the host's storage domain |
-| Models | None required — the built-in embedder is deterministic hashing (zero downloads) |
+`dsh-library` 把本地 md/txt 文档变成可查询的知识库，并带一套 agent 可以核验的质量管线：
 
-## What you get
-
-`dsh-library` turns local md/txt documents into a queryable knowledge base with a quality pipeline your agent can trust:
-
-- **`library_add` / `library_remove` / `library_list`** — import a document by path (chunked and embedded), remove one with **purge verification** (signatures of the removed content are probed against the remaining index and any residue is reported), and list document metadata.
-- **`library_search`** — hybrid semantic + keyword ranking, maximal-marginal-relevance diversity re-rank, relevance filtering, and **lost-in-the-middle avoidance** (strongest chunks pinned to head and tail). With `inject: true` the result page is injected into the calling agent; every hit carries a `[n]` source marker and the injection is reconstructable from the `library/inject` session event (host-gated; see Permissions & data).
-- **`library_cite_check`** — verify the `[n]` citations in an answer against the search result page with a fuzzy token match AND a semantic similarity check.
-- **`library_diagnose`** — chunk-size histogram, near-duplicate chunk pairs, a self-retrieval probe, and the middle-penalty signal.
-- **`/library`** — one-line index summaries per library.
+- **`library_add` / `library_remove` / `library_list`** —— 按路径导入文档（分块 + 嵌入）、删除文档并做**清除验证**（用被删内容的签名探测剩余索引，残留即报告）、列出文档元数据。
+- **`library_search`** —— 语义 + 关键词混合排序、最大边际相关多样性重排、相关性过滤与**中段丢失规避**（最强切片钉在首尾）。`inject: true` 时结果页注入调用 agent；每条命中带 `[n]` 来源标记，注入可从 `library/inject` 会话事件重建（受宿主门控，见「权限与数据」）。
+- **`library_cite_check`** —— 用模糊词面匹配 + 语义相似度双重校验答案中的 `[n]` 引用。
+- **`library_diagnose`** —— 切片大小直方图、近似重复切片对、自检索探针与中段惩罚信号。
+- **`/library`** —— 每个知识库一行索引摘要。
 
 ```text
-document ── library_add ─▶ chunk (sliding window) ─▶ embed (hash / external cmd)
-                                  │
-                        storage domain (documents / chunks / purges)
-                                  │
-query ── library_search ─▶ hybrid score ─▶ MMR re-rank ─▶ relevance filter
-                                  │                    ─▶ lost-in-middle order
-                                  ▼
-                    result page with [n] markers ── inject: true ─▶ agent + library/inject event (host-gated)
+文档 ── library_add ─▶ 切片（滑窗） ─▶ 嵌入（哈希 / 外部命令）
+                              │
+                  存储域（documents / chunks / purges）
+                              │
+查询 ── library_search ─▶ 混合打分 ─▶ MMR 重排 ─▶ 相关性过滤
+                              │                ─▶ 中段规避排序
+                              ▼
+                带 [n] 标记的结果页 ── inject: true ─▶ agent + library/inject 事件（受宿主门控）
 ```
 
-## Quick start
+### 命令与工具面
 
-```sh
-dsh plugin --profile web add github:PerryLink/dsh-library
-```
+| 工具 | 说明 |
+|---|---|
+| `library_add` | `{ path, library, name? }` → 文档 id；文件经 harness 文件系统服务读取 |
+| `library_remove` | `{ library, documentId }` → 删除摘要 + 清除判定（残留即报告） |
+| `library_list` | `{ library? }` → 文档元数据（绝不含正文） |
+| `library_search` | `{ query, library, topK?, inject? }` → 带 `[n]` 标记的排序命中；`inject: true` 注入调用 agent |
+| `library_cite_check` | `{ library, query, answer }` → 逐条引用有效/无效判定（模糊 + 语义） |
+| `library_diagnose` | `{ library }` → 切片统计、重复、自检索、中段惩罚 |
+| `/library [name]` | 命令：每个知识库的文档/切片摘要 |
 
-```sh
-# 1. install the bundle into your profile
-dsh plugin --profile web add github:PerryLink/dsh-library
+### 示例
 
-# or from npm (published releases)
-dsh plugin --profile web add dsh-library
+以下为插件真实入口；安装后调用一个即可。
 
-# 2. restart and verify the row
-dsh --profile web --dump-config | grep -A2 'id: dsh-library'
-```
+**详细示例**
 
-Then ask the agent to import and use a document:
-
-```
-> Add ./docs/spec.md to library docs, then answer: what does the spec say about retries? Cite [n] markers.
-```
-
-### Examples
-
-These are the plugin's real entry points; install once, then call one.
-
-#### Detailed example
-
-**Command**
+**命令**
 
 ~~~sh
 library_search({ library: "docs", query: "what is the harness built on", inject: true })
 ~~~
 
-**Output**
+**输出**
 
 ~~~text
 Library docs: 2 result(s) for "what is the harness built on"
@@ -138,15 +131,15 @@ Library docs: 2 result(s) for "what is the harness built on"
 
 *Observed from `README.md:161-167; tests/index.spec.ts:46-64; src/index.ts:830-836`*
 
-#### Failure branch
+**失败分支**
 
-**Input**
+**输入**
 
 ~~~text
 {"path":"/nonexistent/dsh-library-missing.txt","library":"docs"}
 ~~~
 
-**Output**
+**输出**
 
 ~~~text
 isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": not found; error.info={"name":"FsError","code":"FS_NOT_FOUND"}
@@ -154,112 +147,185 @@ isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": 
 
 *Observed from `plugins/dsh-library/src/index.ts:695-696 (fs.resolve/readText); plugins/dsh-library/tests/index.spec.ts:143-151 (unreadable path); plugins/dsh-library/README.md:195 (unreadable files fail loud); exercised through plugins/dsh-library/tests/harness.ts`*
 
-#### Brief examples
+**简短示例**：`library_search` · `library_list`
 
-- `library_search`
-- `library_list`
+## 配置
 
-## Configuration
+所有可调项都是 Schemastery `Config` 字段（可在 cordis.yml 中修改）。按 id 定向覆盖会替换整行——需要重新声明每个键。`cordis.patch.yml` 内联说明了每个键。
 
-All tunables are Schemastery `Config` fields (changeable from cordis.yml). An id-targeted override replaces the whole row — restate every key you need. `cordis.patch.yml` documents each key inline.
+最常用键：
 
-| Key | Default | Meaning |
+| 键 | 默认值 | 含义 |
 |---|---|---|
-| `chunkSize` | `900` | Sliding-window chunk size in characters (≤ 4000) |
-| `chunkOverlap` | `120` | Overlap between consecutive windows; must be smaller than `chunkSize` |
-| `maxFileBytes` | `5242880` | Files larger than this are rejected on `library_add` |
-| `embedding.dims` | `256` | Hash-embedding dimensionality (≥ 8) |
-| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in, zero downloads), `command` (external subprocess, requires `embedding.command`), or `ollama` (local Ollama, probed and degraded to `hash` when unreachable) |
-| `embedding.command` | `''` | Optional external embedder command (space-separated argv, no shell) over `ctx.subprocess`; setting it selects the `command` provider |
-| `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | Local Ollama endpoint + model for the `ollama` provider (zero cloud) |
-| `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | Embedder subprocess budget |
-| `search.topK` | `8` | Results returned after the full pipeline |
-| `search.hybridWeight` | `0.6` | 0 = keyword-only, 1 = semantic-only |
-| `search.minRelevance` | `0.15` | Chunks below this relevance threshold are filtered out |
-| `search.diversityLambda` | `0.5` | MMR trade-off: 1 = pure relevance, 0 = pure diversity |
-| `search.lostMiddleHead` / `lostMiddleTail` | `1` / `1` | Strongest chunks pinned to head / tail |
-| `search.maxResultChars` | `16000` | Character budget of the model-facing result page |
-| `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` inject behavior and budget |
-| `citation.windowChars` / `minScore` / `minSemantic` | `150` / `40` / `0.1` | `library_cite_check` thresholds |
-| `purge.signatureLength` / `maxProbes` | `4` / `24` | Purge verification signatures and probe budget |
-| `diagnose.maxDuplicatePairs` / `sampleCap` / `positionBins` | `24` / `200` / `5` | `library_diagnose` budget caps |
+| `chunkSize` | `900` | 滑窗切片大小（字符，≤ 4000） |
+| `chunkOverlap` | `120` | 相邻窗口重叠；必须小于 `chunkSize` |
+| `maxFileBytes` | `5242880` | 超过该大小的文件在 `library_add` 被拒绝 |
+| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程，需 `embedding.command`）、`ollama`（本地 Ollama，探测不可用时降级回 `hash`） |
+| `search.topK` | `8` | 完整管线后返回的结果数 |
+| `search.hybridWeight` | `0.6` | 0 = 仅关键词，1 = 仅语义 |
+| `search.minRelevance` | `0.15` | 低于该相关性阈值的切片被过滤 |
+| `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` 注入行为与预算 |
 
-## Tools & surfaces
+<details>
+<summary>完整配置表（18 组键）</summary>
 
-| Tool | Notes |
+| 键 | 默认值 | 含义 |
+|---|---|---|
+| `chunkSize` | `900` | 滑窗切片大小（字符，≤ 4000） |
+| `chunkOverlap` | `120` | 相邻窗口重叠；必须小于 `chunkSize` |
+| `maxFileBytes` | `5242880` | 超过该大小的文件在 `library_add` 被拒绝 |
+| `embedding.dims` | `256` | 哈希嵌入维度（≥ 8） |
+| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程，需 `embedding.command`）、`ollama`（本地 Ollama，探测不可用时降级回 `hash`） |
+| `embedding.command` | `''` | 可选外部嵌入命令（空格分隔 argv、无 shell）走 `ctx.subprocess`；设置后即选择 `command` 后端 |
+| `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | `ollama` 后端的本地 Ollama 端点与模型（零云端） |
+| `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | 嵌入子进程预算 |
+| `search.topK` | `8` | 完整管线后返回的结果数 |
+| `search.hybridWeight` | `0.6` | 0 = 仅关键词，1 = 仅语义 |
+| `search.minRelevance` | `0.15` | 低于该相关性阈值的切片被过滤 |
+| `search.diversityLambda` | `0.5` | MMR 权衡：1 = 纯相关，0 = 纯多样 |
+| `search.lostMiddleHead` / `lostMiddleTail` | `1` / `1` | 最强切片钉在首 / 尾 |
+| `search.maxResultChars` | `16000` | 模型可见结果页字符预算 |
+| `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` 注入行为与预算 |
+| `citation.windowChars` / `minScore` / `minSemantic` | `150` / `40` / `0.1` | `library_cite_check` 阈值 |
+| `purge.signatureLength` / `maxProbes` | `4` / `24` | 清除验证签名与探测预算 |
+| `diagnose.maxDuplicatePairs` / `sampleCap` / `positionBins` | `24` / `200` / `5` | `library_diagnose` 预算上限 |
+
+</details>
+
+profile patch 覆盖示例：
+
+```yaml
+- insert:
+    - id: dsh-library
+      name: dsh-library
+      config:
+        chunkSize: 900
+        embedding:
+          provider: ollama
+          ollamaModel: nomic-embed-text
+        search:
+          hybridWeight: 0.7
+```
+
+## FAQ
+
+<details>
+<summary>文档内容和索引到底存在哪？会进会话日志吗？</summary>
+
+切片文本与嵌入存放在宿主的存储后端（JSON 或 SQLite），与部署里的其他持久数据同级信任；插件不额外加密。文档路径与嵌入向量绝不进入会话日志——`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志的审计事件，模型可见的注入页可从中重建；宿主不记录这些事件类型时，已记录的 `tool/call` + `tool/result` 仍是可重建的审计链。
+
+</details>
+
+<details>
+<summary>没有模型、没有网络能用吗？</summary>
+
+能。内置嵌入是确定性哈希（词 token + 字符三元组进入带符号桶向量并 L2 归一化），零下载、零网络请求，打分是哈希与词法数学。代价是词法级语义：对改写表达的检索质量低于真实嵌入模型——需要更强语义时配置 `embedding.command`（任意子进程嵌入）或 `embedding.provider: ollama`（本地 Ollama）。
+
+</details>
+
+<details>
+<summary>删除文档真的删干净了吗？</summary>
+
+`library_remove` 不假定成功：它用被删内容的确定性签名（`purge.signatureLength`）对剩余索引做探测（最多 `purge.maxProbes` 次），把残留如实报告，而不是声称已清除。
+
+</details>
+
+<details>
+<summary>会和其他插件抢工具名或服务吗？</summary>
+
+不会。它只消费宿主服务（`storageDomain` / `tools` / `commands`），注册的工具全部带 `library_` 前缀、命令是 `/library`，不注册任何 waterfall 监听器，也不提供会被其他插件争抢的服务键——因此不占用任何裸工具名。
+
+</details>
+
+<details>
+<summary>性能开销多大？</summary>
+
+默认路径没有模型调用、没有网络请求，成本是一次滑窗切片 + 哈希嵌入，以及检索时的打分与重排。上限由配置兜底：`maxFileBytes` 限制单文档大小、`search.topK` 限制返回数、`search.maxResultChars` 与 `injection.maxChars` 限制模型可见文本预算；`library_diagnose` 可随时查看切片分布与重复情况。
+
+</details>
+
+## 安全边界
+
+- **默认本地。** 零模型下载、零网络调用——打分是确定性哈希与词法数学。只有显式配置的嵌入命令会执行代码，且其协议做完整性检查与输出上限。
+- **不伪造。** 引用检查只报告管线能验证的结论；可疑引用如实呈现，绝不猜测。
+- **清除即验证。** `library_remove` 用被删内容的确定性签名探测剩余索引并报告残留，而不是假定成功。
+- **失败大声。** 非法知识库名、超大文档、不可读文件、配置了却缺失的嵌入接缝，都以明确错误失败。
+
+## 权限与数据
+
+- **权限**：插件只读取你让 `library_add` 指向的文件（经 harness 文件系统服务及其策略），并只写入自己的 `dsh_library` 存储域。无网络请求；可选外部嵌入命令经 `ctx.subprocess` 执行、无 shell 解释。
+- **数据**：切片文本与嵌入存放在宿主的存储后端（与部署的其他持久数据同级信任）；插件不额外加密。文档路径与嵌入向量绝不进入会话日志。
+- **会话日志**：`library/inject`（id、查询、切片 id、页大小）与 `library/purge`（判定）是仅日志审计事件——模型可见的注入页可从中重建。写入受宿主门控：已知类型集合覆盖该词汇的宿主直接写入；带 `ignorable` 信封的构建加标记写入；无信封构建（0.1.1-rc.2、0.1.2-rc.1）跳过写入——此时已记录的 `tool/call` + `tool/result` 事件仍是可重建的审计链。
+0.1.2-rc.1（2026-09-02 已适配）：会话信封保留 ignorable 字段但仅用于存量日志读取兼容——Session.append 仍无法盖章，门控行为不变。
+
+## 已知限制
+
+- **词法级嵌入。** 内置哈希嵌入打分的是表面相似而非语义；对改写表达的检索质量低于真实嵌入模型——配置 `embedding.command`（任意子进程嵌入）或 `embedding.provider: ollama`（本地 Ollama 嵌入模型）可获得更强语义。
+- **本地引用模型。** `library_cite_check` 针对搜索结果页（`[n]` 编号）验证，不支持自由形式的来源名；模糊分数是有界的词序列部分匹配率。
+- **无摄取管线。** 文档须按路径导入（`md`/`txt`）；PDF/docx 抽取不在 v0.1.0 范围。
+- **宿主门控的审计事件。** `library/inject` / `library/purge` 只在能承载它们的宿主上写入（见「权限与数据」）；在已发布的 `0.1.2-rc.1` 线上（与更早的无信封线一样）不写入，所有事实仍可从工具调用/结果日志重建。
+
+## 兼容性
+
+| 方面 | 状态 |
 |---|---|
-| `library_add` | `{ path, library, name? }` → document id; file read through the harness filesystem service |
-| `library_remove` | `{ library, documentId }` → removal summary + purge verdict (residue reported) |
-| `library_list` | `{ library? }` → document metadata (never text) |
-| `library_search` | `{ query, library, topK?, inject? }` → ranked hits with `[n]` markers; `inject: true` seeds the calling agent |
-| `library_cite_check` | `{ library, query, answer }` → per-citation valid/invalid verdicts (fuzzy + semantic) |
-| `library_diagnose` | `{ library }` → chunk stats, duplicates, self-retrieval, middle penalty |
-| `/library [name]` | Command: per-library document/chunk summaries |
+| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1`（2026-09-24 核验：双 typecheck 尺子 + 89 项测试 + self-contained/artifacts 门；peer 三段式 `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`）。全族唯一已实跑 alpha.2 宿主冒烟的仓（2026-09-11）。 |
+| Node | `^22.19.0 \|\| >=24.0.0` |
+| 存储 | 任意 storage-domain 后端（JSON 或 SQLite）；索引存放在宿主的存储域中 |
+| 模型 | 无需任何模型——内置嵌入为确定性哈希（零下载） |
 
-## Permissions & data
+## 生态与质量
 
-- **Permissions**: the plugin only reads files you point `library_add` at (through the harness filesystem service and its policy) and writes into its own `dsh_library` storage domain. No network requests; an optional external embedder runs through `ctx.subprocess` without shell interpretation.
-- **Data**: chunk text and embeddings live in the host's storage backend (same trust as the deployment's other durable data); the plugin adds no encryption. Document paths and embeddings never enter the session log.
-- **Session log**: `library/inject` (id, query, chunk ids, page size) and `library/purge` (verdict) are log-only audit events — the model-visible injected page is reconstructable from them. The append is host-gated: harnesses whose known-type set covers the vocabulary get the events, `ignorable`-envelope builds get them with the marker, and envelope-less builds (0.1.1-rc.2, 0.1.2-rc.1) skip the append — the logged `tool/call` + `tool/result` events remain the reconstructable audit trail there.
-0.1.2-rc.1 (adapted 2026-09-02): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged.
+- [Gitee 镜像](https://gitee.com/perrylink/dsh-library)（同步镜像，以 GitHub 为准）
+- [dshfind 插件页](https://dshfind.com/plugins/PerryLink/dsh-library)（安装量与排名）
+- [OpenSSF Scorecard 报告](https://securityscorecards.dev/viewer/?uri=github.com/PerryLink/dsh-library)（由 [.github/workflows/scorecard.yml](.github/workflows/scorecard.yml) 驱动）
+- [dsh-plugin-doctor 验证报告](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
+- [DSH Market](https://dsh.market/)（已上架）
+- **1024 商店渠道**：先 `npm i -g dsh1024`，再 `dsh1024 plugin --profile web add dsh-library`（计入 [deepseek1024.com](https://deepseek1024.com) 安装排行）
+- [生态实测知识库](https://perrylink.github.io/dsh-plugin-guide/)：插件开发指南 · 选型实测数据 · 维护取舍判据
 
-## Security boundaries
-
-- **Local by default.** Zero model downloads, zero network calls — scoring is deterministic hashing and token math. Only an explicitly configured embedder command runs code, and its protocol is completeness-checked and output-capped.
-- **No fabrication.** Citation checks report what the pipeline can verify; failed repairs and suspicious citations are surfaced honestly, never guessed.
-- **Purge is verified.** `library_remove` probes the remaining index with deterministic signatures of the removed content and reports residue instead of assuming success.
-- **Fail loud.** Invalid library names, oversized documents, unreadable files, and a configured-but-absent embedder seam all fail the call with a clear error.
-
-## Known limitations
-
-- **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` (any subprocess embedder) or `embedding.provider: ollama` (a local Ollama embedding model) for stronger semantics.
-- **Local citation model.** `library_cite_check` validates against the search result page (the `[n]` numbering), not against free-form source names; the fuzzy score is a bounded token-sequence partial ratio.
-- **No ingestion pipeline.** Documents must be imported by path (`md`/`txt`); PDF/docx extraction is out of scope for v0.1.0.
-- **Host-gated audit events.** `library/inject` / `library/purge` are only appended on harnesses that can carry them (see Permissions & data); on the published `0.1.2-rc.1` line (as on earlier envelope-less lines) they are not appended, and every fact stays reconstructable from the tool call/result log.
-
-## Development
+## 开发
 
 ```sh
 pnpm install        # node ^22.19 || >=24
-pnpm run typecheck  # tsc: src + tests against the local harness checkout
-pnpm run typecheck:ci  # tsc against the published 0.1.7-rc.2 types (no paths)
-pnpm test           # vitest: quality ports, core vocabulary, real-stack assembly
-pnpm run build      # tsdown bundle + tsc declarations (lib/)
-pnpm run verify:self-contained  # dependency specs resolve from the registry
-pnpm run verify:artifacts       # built ESM face + bundle patch present
-pnpm pack           # the published tarball
+pnpm run typecheck  # tsc：src + tests 对照本地 harness checkout
+pnpm run typecheck:ci  # tsc：对照已发布的 0.1.7-rc.2 类型（无 paths）
+pnpm test           # vitest：八移植回归、核心词汇、真实栈装配
+pnpm run build      # tsdown bundle + tsc 声明（lib/）
+pnpm run verify:self-contained  # 依赖声明全部来自 registry
+pnpm run verify:artifacts       # 构建产物 ESM 面 + bundle patch 齐全
+pnpm run check:readmes          # 五语 README 一致性
+pnpm pack           # 发布用 tarball
 ```
 
-## Topics
+配图由 [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) 程序化生成（Python + Pillow）：输出 `docs/assets/dsh-library-flow-{light,dark}.svg` 深浅双版 hero，可重复执行。
 
-`dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
+Topics：`dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
 
-## Contributors
+## 家族与致谢
 
-- [@PerryLink](https://github.com/PerryLink) — creator and maintainer: the eight quality ports, storage-domain index, hybrid retrieval pipeline, citation/purge verification, and the five-language docs.
+本项目是 [PerryLink](https://github.com/PerryLink) 维护的 DeepSeek Harness 插件家族成员（95 个，全部 Apache-2.0）。如果这个插件帮到了你，**给个 star**——它不解锁任何功能，但会让下一个人更容易找到它。
 
-## PerryLink DSH Plugin Family
-
-This project is part of the DeepSeek Harness plugin family from [PerryLink](https://github.com/PerryLink). The roster stays collapsed below so every README keeps a short first screen; expand it to see every row and its status.
+- [@PerryLink](https://github.com/PerryLink) —— 创建者与维护者：八项质量移植、存储域索引、混合检索管线、引用/清除验证与五语文档。
 
 <details>
-<summary>Expand all plugins</summary>
+<summary>展开全部插件</summary>
 
-| Plugin | Status |
+| 插件 | 状态 |
 |---|---|
 | **[dsh-aqua-input-check](https://github.com/PerryLink/dsh-aqua-input-check)** |  |
 | **[dsh-archive-check](https://github.com/PerryLink/dsh-archive-check)** |  |
 | **[dsh-auto-review](https://github.com/PerryLink/dsh-auto-review)** |  |
-| **[dsh-autotier](https://github.com/PerryLink/dsh-autotier)** | 🧊 FROZEN — see the repo README |
+| **[dsh-autotier](https://github.com/PerryLink/dsh-autotier)** | 🧊 已冻结 — 见仓库 README |
 | **[dsh-bid-ca-precheck](https://github.com/PerryLink/dsh-bid-ca-precheck)** |  |
 | **[dsh-bid-qual-check](https://github.com/PerryLink/dsh-bid-qual-check)** |  |
-| **[dsh-cert-mcp](https://github.com/PerryLink/dsh-cert-mcp)** | 🧊 FROZEN — see the repo README |
+| **[dsh-cert-mcp](https://github.com/PerryLink/dsh-cert-mcp)** | 🧊 已冻结 — 见仓库 README |
 | **[dsh-checkpoint-rewind](https://github.com/PerryLink/dsh-checkpoint-rewind)** |  |
 | **[dsh-click](https://github.com/PerryLink/dsh-click)** |  |
 | **[dsh-composer-history](https://github.com/PerryLink/dsh-composer-history)** |  |
 | **[dsh-contract-stance](https://github.com/PerryLink/dsh-contract-stance)** |  |
 | **[dsh-customs-doc-check](https://github.com/PerryLink/dsh-customs-doc-check)** |  |
-| **[dsh-data-quality](https://github.com/PerryLink/dsh-data-quality)** |  |
+| **[dsh-data-quality](https://github.com/PerryLink/dsh-data-quality)** | 🧊 已冻结 — 见仓库 README |
 | **[dsh-demurrage-ledger](https://github.com/PerryLink/dsh-demurrage-ledger)** |  |
 | **[dsh-doublecheck](https://github.com/PerryLink/dsh-doublecheck)** |  |
 | **[dsh-drill-script-check](https://github.com/PerryLink/dsh-drill-script-check)** |  |
@@ -292,7 +358,7 @@ This project is part of the DeepSeek Harness plugin family from [PerryLink](http
 | **[dsh-mask](https://github.com/PerryLink/dsh-mask)** |  |
 | **[dsh-mcp-panel](https://github.com/PerryLink/dsh-mcp-panel)** |  |
 | **[dsh-medrec-qc](https://github.com/PerryLink/dsh-medrec-qc)** |  |
-| **[dsh-memento](https://github.com/PerryLink/dsh-memento)** |  |
+| **[dsh-memento](https://github.com/PerryLink/dsh-memento)** | 🧊 已冻结 — 见仓库 README |
 | **[dsh-nsfc-form-check](https://github.com/PerryLink/dsh-nsfc-form-check)** |  |
 | **[dsh-nurse-record-check](https://github.com/PerryLink/dsh-nurse-record-check)** |  |
 | **[dsh-observe](https://github.com/PerryLink/dsh-observe)** |  |
@@ -304,10 +370,10 @@ This project is part of the DeepSeek Harness plugin family from [PerryLink](http
 | **[dsh-permit-report-check](https://github.com/PerryLink/dsh-permit-report-check)** |  |
 | **[dsh-pipeline-check](https://github.com/PerryLink/dsh-pipeline-check)** |  |
 | **[dsh-pleading-draft](https://github.com/PerryLink/dsh-pleading-draft)** |  |
-| **[dsh-plugin-doctor](https://github.com/PerryLink/dsh-plugin-doctor)** |  |
+| **[dsh-plugin-doctor](https://github.com/PerryLink/dsh-plugin-doctor)** | 🚫 已退役（仓库已归档） |
 | **[dsh-plugin-guide](https://github.com/PerryLink/dsh-plugin-guide)** |  |
-| **[dsh-plugin-kit](https://github.com/PerryLink/dsh-plugin-kit)** |  |
-| **[dsh-plugin-upgrade](https://github.com/PerryLink/dsh-plugin-upgrade)** |  |
+| **[dsh-plugin-kit](https://github.com/PerryLink/dsh-plugin-kit)** | 🚫 已退役（仓库已归档） |
+| **[dsh-plugin-upgrade](https://github.com/PerryLink/dsh-plugin-upgrade)** | 🚫 已退役（仓库已归档） |
 | **[dsh-policy-brief-draft](https://github.com/PerryLink/dsh-policy-brief-draft)** |  |
 | **[dsh-power-loss-split](https://github.com/PerryLink/dsh-power-loss-split)** |  |
 | **[dsh-power-ticket-check](https://github.com/PerryLink/dsh-power-ticket-check)** |  |
@@ -319,7 +385,7 @@ This project is part of the DeepSeek Harness plugin family from [PerryLink](http
 | **[dsh-review-reply-check](https://github.com/PerryLink/dsh-review-reply-check)** |  |
 | **[dsh-rulefile-check](https://github.com/PerryLink/dsh-rulefile-check)** |  |
 | **[dsh-safety-brief-check](https://github.com/PerryLink/dsh-safety-brief-check)** |  |
-| **[dsh-score](https://github.com/PerryLink/dsh-score)** |  |
+| **[dsh-score](https://github.com/PerryLink/dsh-score)** | 🧊 已冻结 — 见仓库 README |
 | **[dsh-session-sync](https://github.com/PerryLink/dsh-session-sync)** |  |
 | **[dsh-site-log-check](https://github.com/PerryLink/dsh-site-log-check)** |  |
 | **[dsh-skill-pack-security](https://github.com/PerryLink/dsh-skill-pack-security)** |  |
@@ -331,20 +397,22 @@ This project is part of the DeepSeek Harness plugin family from [PerryLink](http
 | **[dsh-tender-extract](https://github.com/PerryLink/dsh-tender-extract)** |  |
 | **[dsh-tender-matrix](https://github.com/PerryLink/dsh-tender-matrix)** |  |
 | **[dsh-test-drive](https://github.com/PerryLink/dsh-test-drive)** |  |
-| **[dsh-ticktick](https://github.com/PerryLink/dsh-ticktick)** |  |
+| **[dsh-ticktick](https://github.com/PerryLink/dsh-ticktick)** | 🚫 已退役（仓库已归档） |
 | **[dsh-translate](https://github.com/PerryLink/dsh-translate)** |  |
 | **[dsh-warranty-calc](https://github.com/PerryLink/dsh-warranty-calc)** |  |
-| **[dsh-budget](https://github.com/PerryLink/dsh-budget)** | 🧊 FROZEN — see the repo README |
-| **[dsh-claude-move](https://github.com/PerryLink/dsh-claude-move)** | 🧊 FROZEN — see the repo README |
-| **[dsh-defend](https://github.com/PerryLink/dsh-defend)** | 🧊 FROZEN — see the repo README |
-| **[dsh-draw](https://github.com/PerryLink/dsh-draw)** | 🧊 FROZEN — see the repo README |
-| **[dsh-reach](https://github.com/PerryLink/dsh-reach)** | 🧊 FROZEN — see the repo README |
-| **[dsh-background-agents](https://github.com/PerryLink/dsh-background-agents)** | 🚫 RETIRED — see the repo README |
-| **[dsh-session-pin](https://github.com/PerryLink/dsh-session-pin)** | 🚫 RETIRED — see the repo README |
-| **[dsh-team-rooms](https://github.com/PerryLink/dsh-team-rooms)** | 🚫 RETIRED — see the repo README |
+| **[dsh-budget](https://github.com/PerryLink/dsh-budget)** | 🧊 已冻结 — 见仓库 README |
+| **[dsh-claude-move](https://github.com/PerryLink/dsh-claude-move)** | 🧊 已冻结 — 见仓库 README |
+| **[dsh-defend](https://github.com/PerryLink/dsh-defend)** | 🧊 已冻结 — 见仓库 README |
+| **[dsh-draw](https://github.com/PerryLink/dsh-draw)** | 🧊 已冻结 — 见仓库 README |
+| **[dsh-reach](https://github.com/PerryLink/dsh-reach)** | 🧊 已冻结 — 见仓库 README |
+| **[dsh-background-agents](https://github.com/PerryLink/dsh-background-agents)** | 🚫 已退役（仓库已归档） |
+| **[dsh-session-pin](https://github.com/PerryLink/dsh-session-pin)** | 🚫 已退役（仓库已归档） |
+| **[dsh-team-rooms](https://github.com/PerryLink/dsh-team-rooms)** | 🚫 已退役（仓库已归档） |
 
 </details>
 
 ## License
 
-[Apache License 2.0](LICENSE) © 2026 dsh-library contributors
+[LICENSE](LICENSE)（Apache License 2.0）© 2026 dsh-library contributors
+
+<p align="center"><sub>Apache-2.0 · 社区插件，与 DeepSeek 无关。</sub></p>
