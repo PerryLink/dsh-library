@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-dark.svg">
-  <img src="docs/assets/dsh-library-flow-light.svg" width="100%" alt="dsh-library पाइपलाइन: library_add → स्लाइडिंग-विंडो चंक → स्थानीय एम्बेडिंग → dsh_library भंडारण डोमेन; library_search → हाइब्रिड स्कोरिंग → MMR पुनः-क्रम → प्रासंगिकता फ़िल्टर → [n] चिह्नित परिणाम-पृष्ठ → inject; library_cite_check और library_remove पर्ज सत्यापन">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-hero-en-dark.webp">
+  <img src="docs/assets/dsh-library-hero-en-light.webp" width="100%" alt="dsh-library बैनर: बाईं ओर प्लगइन का नाम और दो मूल्य-पंक्तियाँ; दाईं ओर इनजेस्ट रिबन (spec.md चार चंक में कटा, 256-आयामी हैश एम्बेडिंग), [1]…[8] चिह्नों वाला परिणाम-पृष्ठ जिसमें सबसे मजबूत दो शीर्ष और पुच्छ पर टिके हैं, और उद्धरण व विलोपन की दो जाँचें">
 </picture>
 
 # dsh-library
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-library
 ## यह क्या है
 
 `dsh-library` आपके md/txt दस्तावेज़ों को एक स्थानीय ज्ञानकोश में बदलता है जिसे आपका एजेंट क्वेरी कर सकता है। `library_add` पथ से दस्तावेज़ पढ़ता है, स्लाइडिंग विंडो से चंक करता है और होस्ट के `dsh_library` भंडारण डोमेन में लिखता है; `library_search` सिमेंटिक + कीवर्ड स्कोरिंग, MMR विविधता पुनः-क्रम, प्रासंगिकता फ़िल्टर और lost-in-the-middle बचाव को मिलाकर `[n]` स्रोत चिह्नों वाला परिणाम-पृष्ठ लौटाता है। उद्धरण `library_cite_check` से एक-एक करके जाँचे जाते हैं, और विलोपन `library_remove` के पर्ज सत्यापन से अवशेष के लिए फिर से जाँचे जाते हैं। डिफ़ॉल्ट रूप से शून्य मॉडल डाउनलोड और शून्य नेटवर्क अनुरोध — स्कोरिंग नियतात्मक हैश और टोकन गणित है।
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="dsh-library संरचना: बीच में एक dsh_library भंडारण-डोमेन पट्टी (documents / chunks / purges); ऊपर की इनजेस्ट पट्टी आकार-सीमा, स्लाइडिंग-विंडो चंक और एम्बेडर से होकर उसी डोमेन में लिखती है; नीचे की पुनर्प्राप्ति पट्टी क्वेरी और उसी डोमेन के चंक को हाइब्रिड स्कोरिंग, MMR पुनः-क्रम, प्रासंगिकता फ़िल्टर और शीर्ष/पुच्छ पिनिंग में डालकर [n] चिह्नों वाला पृष्ठ बनाती है; पृष्ठ के बाहर दो जाँचें उद्धरण और विलोपन सत्यापित करती हैं">
+</picture>
 
 ## तीन चरणों में शुरुआत
 
@@ -85,17 +90,6 @@ dsh plugin --profile <name> add dsh-library
 - **`library_cite_check`** — उत्तर के `[n]` उद्धरणों को परिणाम-पृष्ठ के विरुद्ध फ़ज़ी टोकन मिलान और सिमेंटिक समानता जाँच, दोनों से सत्यापित करता है।
 - **`library_diagnose`** — चंक-आकार हिस्टोग्राम, लगभग-डुप्लिकेट चंक जोड़े, स्व-पुनर्प्राप्ति प्रोब और मध्य-दंड संकेत।
 - **`/library`** — प्रति पुस्तकालय एक पंक्ति में सूचकांक सारांश।
-
-```text
-दस्तावेज़ ── library_add ─▶ चंक (स्लाइडिंग विंडो) ─▶ एम्बेड (हैश / बाहरी कमांड)
-                                     │
-                        भंडारण डोमेन (documents / chunks / purges)
-                                     │
-क्वेरी ── library_search ─▶ हाइब्रिड स्कोर ─▶ MMR पुनः-क्रम ─▶ प्रासंगिकता फ़िल्टर
-                                     │                    ─▶ lost-in-middle क्रम
-                                     ▼
-                    [n] चिह्नों वाला परिणाम-पृष्ठ ── inject: true ─▶ एजेंट + library/inject घटना (होस्ट-गेटेड)
-```
 
 ### कमांड और टूल सतह
 
@@ -298,7 +292,7 @@ pnpm run check:readmes          # पाँच भाषाओं के README 
 pnpm pack           # प्रकाशित tarball
 ```
 
-README की तस्वीरें [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow) से प्रोग्रामीक रूप से बनती हैं: यह `docs/assets/dsh-library-flow-{light,dark}.svg` हीरो जोड़ी लिखता है और दोबारा चलाना सुरक्षित है।
+README की तस्वीरें [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) से प्रोग्रामीक रूप से बनती हैं: Pillow हीरो बैनर (`docs/assets/dsh-library-hero-{zh,en}-{light,dark}.webp`) बनाता है और हस्तलिखित SVG संरचना-चित्र (`docs/assets/dsh-library-flow-v5-{light,dark}.svg`) बनाता है; दोनों दोबारा चलाना सुरक्षित है। पुराना एक-पैनल प्रवाह-चित्र बाहरी लिंक के लिए `docs/assets/` में रहता है; README अब केवल नए hero और flow-v5 जोड़े का संदर्भ देते हैं।
 
 Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
 

@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-dark.svg">
-  <img src="docs/assets/dsh-library-flow-light.svg" width="100%" alt="dsh-library pipeline: library_add → sliding-window chunks → local embedding → dsh_library storage domain; library_search → hybrid scoring → MMR re-rank → relevance filter → [n]-marked result page → inject; library_cite_check and library_remove purge verification">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-hero-en-dark.webp">
+  <img src="docs/assets/dsh-library-hero-en-light.webp" width="100%" alt="dsh-library banner: the plugin name and two value lines on the left; on the right the ingest ribbon (spec.md sliced into 4 chunks with a 256-d hash embedding), the hit page marked [1]…[8] with the strongest two pinned to head and tail, and the two probes for citations and removals">
 </picture>
 
 # dsh-library
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-library
 ## What it is
 
 `dsh-library` turns your md/txt documents into a local knowledge base your agent can query. `library_add` reads a document by path, chunks it with a sliding window, and writes it into the host's `dsh_library` storage domain; `library_search` combines semantic and keyword scoring, maximal-marginal-relevance diversity re-ranking, relevance filtering, and lost-in-the-middle avoidance to return a result page marked with `[n]` sources. Citations can be checked one by one with `library_cite_check`, and deletions are re-probed for residue by `library_remove`'s purge verification. Zero model downloads and zero network requests by default — scoring is deterministic hashing and token math.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="dsh-library structure: one dsh_library storage-domain bar in the middle (documents / chunks / purges); the ingest band above it takes a path through the file gate, sliding-window chunks and the embedder into that domain; the retrieval band below it feeds the query and the same domain's chunks into hybrid scoring, MMR re-rank, relevance filtering and head/tail pinning to produce the [n]-marked page; two probes outside the page verify citations and removals">
+</picture>
 
 ## Three-step setup
 
@@ -85,17 +90,6 @@ Every PerryLink plugin is listed in the built-in DSH Desktop market: **Market �
 - **`library_cite_check`** — verify the `[n]` citations in an answer against the search result page with a fuzzy token match AND a semantic similarity check.
 - **`library_diagnose`** — chunk-size histogram, near-duplicate chunk pairs, a self-retrieval probe, and the middle-penalty signal.
 - **`/library`** — one-line index summaries per library.
-
-```text
-document ── library_add ─▶ chunk (sliding window) ─▶ embed (hash / external cmd)
-                                  │
-                        storage domain (documents / chunks / purges)
-                                  │
-query ── library_search ─▶ hybrid score ─▶ MMR re-rank ─▶ relevance filter
-                                  │                    ─▶ lost-in-middle order
-                                  ▼
-                    result page with [n] markers ── inject: true ─▶ agent + library/inject event (host-gated)
-```
 
 ### Commands & tools surface
 
@@ -298,7 +292,7 @@ pnpm run check:readmes          # five-language README consistency
 pnpm pack           # the published tarball
 ```
 
-The README images are generated programmatically by [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow): it writes the light/dark hero pair `docs/assets/dsh-library-flow-{light,dark}.svg` and is safe to re-run.
+The README images are generated programmatically by [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py): Pillow draws the hero banners (`docs/assets/dsh-library-hero-{zh,en}-{light,dark}.webp`) and a hand-written SVG draws the structure diagram (`docs/assets/dsh-library-flow-v5-{light,dark}.svg`); both are safe to re-run. The older single-panel flow diagram stays in `docs/assets/` for external links; the READMEs only reference the new hero and flow-v5 pairs.
 
 Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
 

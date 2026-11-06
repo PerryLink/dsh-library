@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-dark.svg">
-  <img src="docs/assets/dsh-library-flow-light.svg" width="100%" alt="dsh-library 管线：library_add → 滑窗切片 → 本地嵌入 → dsh_library 存储域；library_search → 混合打分 → MMR 重排 → 相关性过滤 → 带 [n] 标记的结果页 → inject；library_cite_check 与 library_remove 清除验证">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-hero-zh-dark.webp">
+  <img src="docs/assets/dsh-library-hero-zh-light.webp" width="100%" alt="dsh-library 配图：左列是插件名与两行价值句；右侧从进库带开始——spec.md 切成 4 片、256 维哈希嵌入——下面是带 [1]…[8] 标记的命中页（最强两片钉在首尾），最后是引用与清除两条探针">
 </picture>
 
 # dsh-library
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-library
 ## 它是什么
 
 `dsh-library` 把你的 md/txt 文档变成 agent 可查询的本地知识库。`library_add` 按路径读入文档、做滑窗切片并写入宿主的 `dsh_library` 存储域；`library_search` 用语义 + 关键词混合打分、MMR 多样性重排、相关性过滤与中段规避，返回带 `[n]` 来源标记的结果页。引用可以用 `library_cite_check` 逐条核验，删除可以用 `library_remove` 的清除验证探针复查残留。默认零模型下载、零网络请求——打分是确定性哈希与词法数学。
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="dsh-library 结构图：中间一条 dsh_library 存储域横条（documents / chunks / purges 三单元）；上带写入——路径门禁、滑窗切片、嵌入后写进存储域；下带检索——查询与同一存储域的切片一起进入混合打分、MMR 重排、相关性过滤、钉首尾，得到带 [n] 的结果页；页外两条探针分别核验引用与清除">
+</picture>
 
 ## 三步上手
 
@@ -85,17 +90,6 @@ dsh plugin --profile <name> add dsh-library
 - **`library_cite_check`** —— 用模糊词面匹配 + 语义相似度双重校验答案中的 `[n]` 引用。
 - **`library_diagnose`** —— 切片大小直方图、近似重复切片对、自检索探针与中段惩罚信号。
 - **`/library`** —— 每个知识库一行索引摘要。
-
-```text
-文档 ── library_add ─▶ 切片（滑窗） ─▶ 嵌入（哈希 / 外部命令）
-                              │
-                  存储域（documents / chunks / purges）
-                              │
-查询 ── library_search ─▶ 混合打分 ─▶ MMR 重排 ─▶ 相关性过滤
-                              │                ─▶ 中段规避排序
-                              ▼
-                带 [n] 标记的结果页 ── inject: true ─▶ agent + library/inject 事件（受宿主门控）
-```
 
 ### 命令与工具面
 
@@ -298,7 +292,7 @@ pnpm run check:readmes          # 五语 README 一致性
 pnpm pack           # 发布用 tarball
 ```
 
-配图由 [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) 程序化生成（Python + Pillow）：输出 `docs/assets/dsh-library-flow-{light,dark}.svg` 深浅双版 hero，可重复执行。
+配图由 [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) 程序化生成：hero 横幅用 Pillow 画（`docs/assets/dsh-library-hero-{zh,en}-{light,dark}.webp`），结构图用手写 SVG 画（`docs/assets/dsh-library-flow-v5-{light,dark}.svg`），可重复执行。旧的单版流程图保留在 `docs/assets/` 供外链使用，README 只引用新生成的 hero 与 flow-v5。
 
 Topics：`dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
 

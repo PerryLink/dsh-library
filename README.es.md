@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-dark.svg">
-  <img src="docs/assets/dsh-library-flow-light.svg" width="100%" alt="Pipeline de dsh-library: library_add → chunks de ventana deslizante → embedding local → dominio de almacenamiento dsh_library; library_search → puntuación híbrida → re-rank MMR → filtro de relevancia → página de resultados con marcadores [n] → inject; library_cite_check y verificación de purga de library_remove">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-hero-en-dark.webp">
+  <img src="docs/assets/dsh-library-hero-en-light.webp" width="100%" alt="Banner de dsh-library: a la izquierda el nombre del plugin y dos líneas de valor; a la derecha la cinta de ingesta (spec.md troceado en 4 chunks con embedding hash de 256 dimensiones), la página de resultados marcada [1]…[8] con los dos mejores fijados al principio y al final, y las dos sondas de citas y de eliminación">
 </picture>
 
 # dsh-library
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-library
 ## Qué es
 
 `dsh-library` convierte tus documentos md/txt en una base de conocimiento local que tu agente puede consultar. `library_add` lee un documento por ruta, lo trocea con una ventana deslizante y lo escribe en el dominio de almacenamiento `dsh_library` del host; `library_search` combina puntuación semántica y por palabras clave, re-ranking por diversidad de máxima relevancia marginal, filtrado por relevancia y evitación del lost-in-the-middle para devolver una página de resultados marcada con fuentes `[n]`. Las citas se comprueban una a una con `library_cite_check`, y las eliminaciones se vuelven a sondear en busca de residuos con la verificación de purga de `library_remove`. Cero descargas de modelos y cero peticiones de red por defecto: la puntuación es hash determinista y matemática de tokens.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="Estructura de dsh-library: una barra central con el dominio de almacenamiento dsh_library (documents / chunks / purges); la banda de ingesta, encima, lleva una ruta por el control de tamaño, los chunks de ventana deslizante y el embedder hasta ese dominio; la banda de recuperación, debajo, mete la consulta y los chunks de ese mismo dominio en puntuación híbrida, re-rank MMR, filtro de relevancia y fijado de cabeza y cola hasta producir la página con marcadores [n]; fuera de la página, dos sondas verifican citas y eliminaciones">
+</picture>
 
 ## Instalación en tres pasos
 
@@ -85,17 +90,6 @@ Todos los plugins de PerryLink pueden explorarse en el mercado integrado de DSH 
 - **`library_cite_check`** — verifica las citas `[n]` de una respuesta contra la página de resultados con una coincidencia difusa de tokens Y una comprobación de similitud semántica.
 - **`library_diagnose`** — histograma de tamaños de chunk, pares de chunks casi duplicados, una sonda de auto-recuperación y la señal de penalización media.
 - **`/library`** — resúmenes del índice por biblioteca en una línea.
-
-```text
-documento ── library_add ─▶ chunk (ventana deslizante) ─▶ embed (hash / comando externo)
-                                     │
-                        dominio de almacenamiento (documents / chunks / purges)
-                                     │
-consulta ── library_search ─▶ puntuación híbrida ─▶ re-rank MMR ─▶ filtro de relevancia
-                                     │                        ─▶ orden lost-in-middle
-                                     ▼
-                    página de resultados con marcadores [n] ── inject: true ─▶ agente + evento library/inject (condicionado por el host)
-```
 
 ### Superficie de comandos y herramientas
 
@@ -298,7 +292,7 @@ pnpm run check:readmes          # consistencia de los README en cinco idiomas
 pnpm pack           # el tarball publicado
 ```
 
-Las imágenes del README las genera programáticamente [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow): escribe el par hero `docs/assets/dsh-library-flow-{light,dark}.svg` y se puede volver a ejecutar sin riesgo.
+Las imágenes del README las genera programáticamente [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py): Pillow dibuja los banners hero (`docs/assets/dsh-library-hero-{zh,en}-{light,dark}.webp`) y un SVG escrito a mano dibuja el diagrama de estructura (`docs/assets/dsh-library-flow-v5-{light,dark}.svg`); ambos se pueden volver a ejecutar sin riesgo. El diagrama de flujo antiguo de un solo panel se queda en `docs/assets/` para enlaces externos; los README solo referencian los nuevos pares hero y flow-v5.
 
 Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `knowledge-base`, `retrieval`, `embedding`, `vector-search`, `citation-validation`, `document-library`
 

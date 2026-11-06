@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="660" viewBox="0 0 1100 660" role="img" aria-label="dsh-library 结构图：中间一条 dsh_library 存储域横条，上带写入（路径门禁、滑窗切片、嵌入），下带检索（查询与同一存储域的切片一起进入混合打分、MMR、相关性过滤、钉首尾），得到带 [n] 的结果页；页外两条探针做引用与清除核验">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#f9f6fd"/><stop offset="1" stop-color="#e4eaf8"/></linearGradient>
+<filter id="soft" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#16122c" flood-opacity="0.10"/></filter>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.4" markerHeight="6.4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4B67B4"/></marker>
+</defs>
+<rect width="1100" height="660" fill="url(#bg)"/>
+<text x="44" y="58" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="28" font-weight="700">dsh-library</text>
+<text x="44" y="86" fill="#4d5261" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="15">同一个存储域，两条带：上面切片入库，下面检索取页；页里每条带 [n]，页外两条探针。</text>
+<rect x="808.0" y="34" width="248.0" height="26" rx="13.0" fill="#f5f2fb"/>
+<text x="820.0" y="51.2" fill="#4B67B4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12">6 tools · 3 storage units · 0 downloads</text>
+<line x1="44" y1="104" x2="1056" y2="104" stroke="#dcd8ea" stroke-width="1"/>
+<text x="44" y="126" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12" font-weight="700">① 写入带 · 文档进库</text>
+<rect x="44" y="138" width="202" height="140" rx="18" fill="#ffffff" stroke="#e6e2ef" stroke-width="1.5" filter="url(#soft)"/>
+<text x="62" y="168" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="15" font-weight="700">library_add</text>
+<text x="62" y="188" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">{ path, library, name? }</text>
+<line x1="62" y1="200" x2="228" y2="200" stroke="#dcd8ea" stroke-width="1"/>
+<text x="62" y="222" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12">md / txt · ≤ 5 MiB</text>
+<text x="62" y="242" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">经 harness 文件系统读取</text>
+<text x="62" y="262" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">documentId = 内容哈希</text>
+<rect x="268" y="138" width="422" height="140" rx="18" fill="#ffffff" stroke="#e6e2ef" stroke-width="1.5" filter="url(#soft)"/>
+<text x="286" y="162" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">滑窗切片 · 示例：3240 字的文档 → 4 片</text>
+<text x="286" y="182" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">chunkSize 900 · chunkOverlap 120 · step = 780</text>
+<rect x="304.0" y="196" width="310.0" height="10" rx="4" fill="#f5f2fb"/>
+<rect x="304.0" y="196" width="86.1111111111111" height="10" rx="4" fill="#4B67B4"/>
+<text x="284" y="204" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">c1</text>
+<text x="622" y="204" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">0-900</text>
+<rect x="304.0" y="212" width="310.0" height="10" rx="4" fill="#f5f2fb"/>
+<rect x="378.6296296296296" y="212" width="86.1111111111111" height="10" rx="4" fill="#4B67B4"/>
+<rect x="378.6296296296296" y="212" width="11.481481481481481" height="10" rx="3" fill="#141419" opacity="0.55"/>
+<text x="284" y="220" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">c2</text>
+<text x="622" y="220" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">780-1680</text>
+<rect x="304.0" y="228" width="310.0" height="10" rx="4" fill="#f5f2fb"/>
+<rect x="453.25925925925924" y="228" width="86.1111111111111" height="10" rx="4" fill="#4B67B4"/>
+<rect x="453.25925925925924" y="228" width="11.481481481481481" height="10" rx="3" fill="#141419" opacity="0.55"/>
+<text x="284" y="236" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">c3</text>
+<text x="622" y="236" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">1560-2460</text>
+<rect x="304.0" y="244" width="310.0" height="10" rx="4" fill="#f5f2fb"/>
+<rect x="527.8888888888889" y="244" width="86.1111111111111" height="10" rx="4" fill="#4B67B4"/>
+<rect x="527.8888888888889" y="244" width="11.481481481481481" height="10" rx="3" fill="#141419" opacity="0.55"/>
+<text x="284" y="252" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">c4</text>
+<text x="622" y="252" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">2340-3240</text>
+<text x="286" y="268" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">重叠 120 字：相邻切片共享同一段上下文</text>
+<rect x="718" y="138" width="338" height="140" rx="18" fill="#ffffff" stroke="#e6e2ef" stroke-width="1.5" filter="url(#soft)"/>
+<text x="736" y="162" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">嵌入 · embedding.provider</text>
+<text x="736" y="188" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12">hash · 256 维 · 零下载</text>
+<text x="736" y="208" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12">command · stdio JSON lines</text>
+<text x="736" y="228" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12">ollama · 本地端点，失败回退 hash</text>
+<text x="736" y="252" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">词 token + 字符三元组 → 带符号桶</text>
+<text x="736" y="268" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">L2 归一化后 cosine = 点乘</text>
+<line x1="248" y1="208" x2="262" y2="208" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="692" y1="208" x2="712" y2="208" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="887" y1="278" x2="887" y2="288" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="44" y="292" width="1012" height="90" rx="20" fill="#ffffff" stroke="#4B67B4" stroke-width="1.8" filter="url(#soft)"/>
+<text x="66" y="320" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="14" font-weight="700">② dsh_library · 索引就住在宿主的存储域里</text>
+<text x="66" y="342" fill="#4d5261" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11.5">documents / chunks / purges 三单元 · JSON 或 SQLite 后端 · 记录在持久边界校验</text>
+<text x="66" y="364" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">索引状态全在这里；插件的日志事件不写正文与向量</text>
+<rect x="640" y="304" width="132" height="64" rx="14" fill="#f5f2fb"/>
+<text x="656" y="326" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">documents</text>
+<text x="656" y="346" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">docId · name</text>
+<text x="656" y="362" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">hash · chunks[]</text>
+<rect x="782" y="304" width="132" height="64" rx="14" fill="#f5f2fb"/>
+<text x="798" y="326" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">chunks</text>
+<text x="798" y="346" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">chunkId · seq</text>
+<text x="798" y="362" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">text · 256-d vec</text>
+<rect x="924" y="304" width="132" height="64" rx="14" fill="#f5f2fb"/>
+<text x="940" y="326" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">purges</text>
+<text x="940" y="346" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">purgeId</text>
+<text x="940" y="362" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">passed · found</text>
+<text x="44" y="404" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="12" font-weight="700">③ 检索带 · 提问取页</text>
+<rect x="44" y="418" width="188" height="108" rx="18" fill="#ffffff" stroke="#e6e2ef" stroke-width="1.5" filter="url(#soft)"/>
+<text x="62" y="444" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="14" font-weight="700">library_search</text>
+<text x="62" y="466" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">{ query, library,</text>
+<text x="62" y="482" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">  topK?, inject? }</text>
+<text x="62" y="508" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">topK 8 · 16000 字</text>
+<rect x="250" y="418" width="310" height="34" rx="12" fill="#f5f2fb" stroke="#4B67B4" stroke-width="1.4"/>
+<text x="268" y="434" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">混合打分</text>
+<text x="268" y="448" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">hybridWeight 0.6 · 语义 + 关键词</text>
+<path d="M264 454 l4 4 l4 -4" fill="none" stroke="#4d5261" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="250" y="464" width="278" height="34" rx="12" fill="#f5f2fb" stroke="#4B67B4" stroke-width="1.4"/>
+<text x="268" y="480" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">MMR 多样性重排</text>
+<text x="268" y="494" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">diversityLambda 0.5 · 池 ≤ 500</text>
+<path d="M264 500 l4 4 l4 -4" fill="none" stroke="#4d5261" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="250" y="510" width="246" height="34" rx="12" fill="#f5f2fb" stroke="#4B67B4" stroke-width="1.4"/>
+<text x="268" y="526" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">相关性过滤</text>
+<text x="268" y="540" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">minRelevance 0.15</text>
+<path d="M264 546 l4 4 l4 -4" fill="none" stroke="#4d5261" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="250" y="556" width="214" height="34" rx="12" fill="#f5f2fb" stroke="#4B67B4" stroke-width="1.4"/>
+<text x="268" y="572" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="13" font-weight="700">截到 topK 再钉首尾</text>
+<text x="268" y="586" fill="#4d5261" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">lostMiddleHead 1 · Tail 1</text>
+<line x1="234" y1="435" x2="244" y2="435" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="300" y1="382" x2="300" y2="412" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="308" y="400" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">该库全部切片</text>
+<rect x="600" y="418" width="456" height="172" rx="20" fill="#ffffff" stroke="#e6e2ef" stroke-width="1.5" filter="url(#soft)"/>
+<text x="620" y="444" fill="#141419" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="14" font-weight="700">带 [n] 的结果页</text>
+<rect x="944.0" y="430" width="92.0" height="22" rx="11.0" fill="#f5f2fb"/>
+<text x="954.0" y="444.85" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11">inject: true</text>
+<text x="620" y="478" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">[1]</text>
+<text x="668" y="478" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11.5">DeepSeek Harness is a plugin-based agent harness…</text>
+<rect x="994.0" y="465" width="42.0" height="18" rx="9.0" fill="#f5f2fb"/>
+<text x="1002.0" y="477.675" fill="#4B67B4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="10.5">head</text>
+<text x="620" y="500" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">[2]</text>
+<text x="668" y="500" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11.5">The recipe for sourdough starts with a levain…</text>
+<text x="620" y="522" fill="#8f94a4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">[3]-[7]</text>
+<text x="668" y="522" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11.5">其余命中 · 按 MMR 顺序，relevance ≥ 0.15</text>
+<text x="620" y="544" fill="#4B67B4" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="12" font-weight="700">[8]</text>
+<text x="668" y="544" fill="#141419" font-family="'Consolas','SFMono-Regular','Menlo',ui-monospace,monospace" font-size="11.5">次强切片钉在尾部 · lostMiddleTail 1</text>
+<rect x="1004.0" y="531" width="32.0" height="18" rx="9.0" fill="#f5f2fb"/>
+<text x="1012.0" y="543.675" fill="#4B67B4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="10.5">tail</text>
+<text x="620" y="574" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11">topK 8 · maxResultChars 16000 · 注入时记 injectId</text>
+<line x1="464" y1="573" x2="594" y2="573" stroke="#4B67B4" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="44" y1="604" x2="1056" y2="604" stroke="#dcd8ea" stroke-width="1"/>
+<text x="44" y="622" fill="#4d5261" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11.5">探针：library_cite_check 模糊 + 语义双判 [n]（窗口 150 字 · minScore 40 · minSemantic 0.1）</text>
+<text x="44" y="640" fill="#8f94a4" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Source Han Sans SC',sans-serif" font-size="11.5">library_remove 用 4-gram 签名探残留（maxProbes 24），残留即报告 ｜ library_diagnose：直方图 / 重复对 / 自检索 / 中段惩罚</text>
+</svg>
