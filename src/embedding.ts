@@ -172,7 +172,7 @@ export function splitCommandLine(command: string): string[] {
  */
 export interface Embedder {
   /** Provider name recorded alongside the index (hash | command | ollama). */
-  readonly name: 'hash' | 'command' | 'ollama'
+  readonly name: 'hash' | 'command' | 'ollama' | 'openai'
   /** Vector dimensionality this backend emits. */
   readonly dims: number
   /**
@@ -307,6 +307,70 @@ export class OllamaEmbedder implements Embedder {
  * @param timeoutMs - probe timeout.
  * @returns the model's dimensionality, or undefined when unavailable.
  */
+/** OpenAI-compatible embeddings (`POST {baseUrl}/embeddings`). */
+export class OpenAiEmbedder implements Embedder {
+  readonly name = 'openai' as const
+
+  /**
+   * @param baseUrl - API base, e.g. `https://api.openai.com/v1`.
+   * @param model - embedding model name.
+   * @param apiKey - bearer token (read from the configured environment variable).
+   * @param dims - expected vector size; a mismatch fails the batch.
+   * @param timeoutMs - per-request deadline.
+   * @param maxBatchItems - texts per request; larger batches split.
+   * @param fetchImpl - fetch seam for tests.
+   */
+  constructor(
+    private readonly baseUrl: string,
+    private readonly model: string,
+    private readonly apiKey: string,
+    readonly dims: number,
+    private readonly timeoutMs: number,
+    private readonly maxBatchItems: number,
+    private readonly fetchImpl: typeof fetch = fetch,
+  ) {}
+
+  async embed(texts: readonly string[]): Promise<number[][]> {
+    const out: number[][] = []
+    for (let start = 0; start < texts.length; start += this.maxBatchItems) {
+      const batch = texts.slice(start, start + this.maxBatchItems)
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), this.timeoutMs)
+      let payload: unknown
+      try {
+        const response = await this.fetchImpl(`${this.baseUrl}/embeddings`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${this.apiKey}` },
+          body: JSON.stringify({ model: this.model, input: batch }),
+          signal: controller.signal,
+        })
+        if (!response.ok) throw new Error(`openai embedder HTTP ${response.status}`)
+        payload = await response.json()
+      } finally {
+        clearTimeout(timer)
+      }
+      const data = (payload as { data?: unknown }).data
+      if (!Array.isArray(data) || data.length !== batch.length) {
+        throw new Error('openai embedder returned a different number of vectors than inputs')
+      }
+      const vectors = data
+        .map((entry, index) => {
+          if (typeof entry !== 'object' || entry === null) throw new Error('openai embedder returned a malformed entry')
+          const record = entry as { embedding?: unknown; index?: unknown }
+          if (!Array.isArray(record.embedding) || record.embedding.length !== this.dims) {
+            throw new Error(`openai embedder vector length does not match embedding.dims (${this.dims})`)
+          }
+          const position = typeof record.index === 'number' ? record.index : index
+          return { position, vector: record.embedding as number[] }
+        })
+        .sort((left, right) => left.position - right.position)
+      for (const { vector } of vectors) out.push(normalizeVector(new Float64Array(vector)))
+    }
+    return out
+  }
+}
+
+/** Probe one Ollama server for an embedding model and its dimensionality. */
 export async function probeOllama(url: string, model: string, timeoutMs: number): Promise<number | undefined> {
   try {
     const response = await fetch(`${url}/api/embed`, {
@@ -361,6 +425,23 @@ export async function resolveEmbedder(
         cwd,
         config.dims,
         { timeoutMs: config.timeoutMs, graceMs: config.graceMs, maxOutputBytes: config.maxOutputBytes },
+        config.maxBatchItems,
+      ),
+      degraded: false,
+    }
+  }
+  if (config.provider === 'openai') {
+    const apiKey = process.env[config.openaiApiKeyEnv]
+    if (apiKey === undefined || apiKey.trim() === '') {
+      throw new Error(`dsh-library: embedding.provider=openai requires ${config.openaiApiKeyEnv} in the environment (the key is never stored in config)`)
+    }
+    return {
+      embedder: new OpenAiEmbedder(
+        config.openaiBaseUrl,
+        config.openaiModel,
+        apiKey.trim(),
+        config.dims,
+        config.timeoutMs,
         config.maxBatchItems,
       ),
       degraded: false,

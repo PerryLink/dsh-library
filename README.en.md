@@ -86,7 +86,7 @@ Every PerryLink plugin is listed in the built-in DSH Desktop market: **Market �
 `dsh-library` turns local md/txt documents into a queryable knowledge base with a quality pipeline your agent can trust:
 
 - **`library_add` / `library_remove` / `library_list`** — import a document by path (chunked and embedded), remove one with **purge verification** (signatures of the removed content are probed against the remaining index and any residue is reported), and list document metadata.
-- **`library_search`** — hybrid semantic + keyword ranking, maximal-marginal-relevance diversity re-rank, relevance filtering, and **lost-in-the-middle avoidance** (strongest chunks pinned to head and tail). With `inject: true` the result page is injected into the calling agent; every hit carries a `[n]` source marker and the injection is reconstructable from the `library/inject` session event (host-gated; see Permissions & data).
+- **`library_search`** — **BM25 + semantic reciprocal-rank fusion** (default; `search.fusion: weighted` keeps the legacy hybrid weight), an auditable **Chinese↔English query bridge**, maximal-marginal-relevance diversity re-rank, relevance filtering, and **lost-in-the-middle avoidance** (strongest chunks pinned to head and tail). With `inject: true` the result page is injected into the calling agent; every hit carries a `[n]` source marker and the injection is reconstructable from the `library/inject` session event (host-gated; see Permissions & data).
 - **`library_cite_check`** — verify the `[n]` citations in an answer against the search result page with a fuzzy token match AND a semantic similarity check.
 - **`library_diagnose`** — chunk-size histogram, near-duplicate chunk pairs, a self-retrieval probe, and the middle-penalty signal.
 - **`/library`** — one-line index summaries per library.
@@ -154,9 +154,13 @@ Most-used keys:
 | `chunkSize` | `900` | Sliding-window chunk size in characters (≤ 4000) |
 | `chunkOverlap` | `120` | Overlap between consecutive windows; must be smaller than `chunkSize` |
 | `maxFileBytes` | `5242880` | Files larger than this are rejected on `library_add` |
-| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in, zero downloads), `command` (external subprocess, requires `embedding.command`), or `ollama` (local Ollama, probed and degraded to `hash` when unreachable) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; fills defaults, explicit fields win |
+| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in), `command` (subprocess), `ollama` (local, degrades to hash), or `openai` (OpenAI-compatible `/embeddings`) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI-compatible endpoint and model |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | environment variable holding the key; the key is never stored |
 | `search.topK` | `8` | Results returned after the full pipeline |
-| `search.hybridWeight` | `0.6` | 0 = keyword-only, 1 = semantic-only |
+| `search.fusion` | `rrf` | `rrf` = BM25 + semantic reciprocal-rank fusion (normalized to the best hit); `weighted` = legacy hybrid weight |
+| `search.hybridWeight` | `0.6` | legacy weighting, used only when `search.fusion = weighted` |
 | `search.minRelevance` | `0.15` | Chunks below this relevance threshold are filtered out |
 | `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` inject behavior and budget |
 
@@ -169,12 +173,16 @@ Most-used keys:
 | `chunkOverlap` | `120` | Overlap between consecutive windows; must be smaller than `chunkSize` |
 | `maxFileBytes` | `5242880` | Files larger than this are rejected on `library_add` |
 | `embedding.dims` | `256` | Hash-embedding dimensionality (≥ 8) |
-| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in, zero downloads), `command` (external subprocess, requires `embedding.command`), or `ollama` (local Ollama, probed and degraded to `hash` when unreachable) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; fills defaults, explicit fields win |
+| `embedding.provider` | `hash` | Embedder backend: `hash` (built-in), `command` (subprocess), `ollama` (local, degrades to hash), or `openai` (OpenAI-compatible `/embeddings`) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI-compatible endpoint and model |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | environment variable holding the key; the key is never stored |
 | `embedding.command` | `''` | Optional external embedder command (space-separated argv, no shell) over `ctx.subprocess`; setting it selects the `command` provider |
 | `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | Local Ollama endpoint + model for the `ollama` provider (zero cloud) |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | Embedder subprocess budget |
 | `search.topK` | `8` | Results returned after the full pipeline |
-| `search.hybridWeight` | `0.6` | 0 = keyword-only, 1 = semantic-only |
+| `search.fusion` | `rrf` | `rrf` = BM25 + semantic reciprocal-rank fusion (normalized to the best hit); `weighted` = legacy hybrid weight |
+| `search.hybridWeight` | `0.6` | legacy weighting, used only when `search.fusion = weighted` |
 | `search.minRelevance` | `0.15` | Chunks below this relevance threshold are filtered out |
 | `search.diversityLambda` | `0.5` | MMR trade-off: 1 = pure relevance, 0 = pure diversity |
 | `search.lostMiddleHead` / `lostMiddleTail` | `1` / `1` | Strongest chunks pinned to head / tail |
@@ -254,7 +262,8 @@ The default path makes no model calls and no network requests; the cost is one s
 
 ## Known limitations
 
-- **Lexical-grade embeddings.** The built-in hash embedder scores surface similarity, not meaning; retrieval quality on paraphrases is lower than a real embedding model — configure `embedding.command` (any subprocess embedder) or `embedding.provider: ollama` (a local Ollama embedding model) for stronger semantics.
+- **Lexical-grade default embeddings.** The built-in hash embedder scores surface similarity, not meaning; configure `embedding.preset: openai` (or `ollama`/`command`) for a real model. BM25 covers exact terms even with the hash default.
+- **Small bilingual dictionary.** The query bridge is deliberately tiny and auditable; unknown terms are not translated.
 - **Local citation model.** `library_cite_check` validates against the search result page (the `[n]` numbering), not against free-form source names; the fuzzy score is a bounded token-sequence partial ratio.
 - **No ingestion pipeline.** Documents must be imported by path (`md`/`txt`); PDF/docx extraction is out of scope for v0.1.0.
 - **Host-gated audit events.** `library/inject` / `library/purge` are only appended on harnesses that can carry them (see Permissions & data); on the published `0.1.2-rc.1` line (as on earlier envelope-less lines) they are not appended, and every fact stays reconstructable from the tool call/result log.
@@ -263,7 +272,7 @@ The default path makes no model calls and no network requests; the cost is one s
 
 | Surface | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (verified 2026-09-25: dual typecheck rulers + 89 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (verified 2026-09-25: dual typecheck rulers + 108 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Storage | Any storage-domain backend (JSON or SQLite); the index lives in the host's storage domain |
 | Models | None required — the built-in embedder is deterministic hashing (zero downloads) |

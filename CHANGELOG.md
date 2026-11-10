@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0] - 2026-11-10
+
+### Added
+
+- **BM25 + RRF fusion.** `library_search` now fuses a BM25 lexical channel with
+  the semantic channel through reciprocal-rank fusion (normalized to the best
+  hit); `search.fusion: weighted` keeps the legacy `hybridWeight` behaviour.
+- **Incremental import.** `library_add` reuses the existing index when the
+  document content, embedder identity and chunk window are unchanged — zero
+  embed calls; the result reports `reused` and `embeddedChunks`.
+- **Embedding presets.** `embedding.preset: hash | ollama | openai | custom`;
+  the new `openai` provider calls any OpenAI-compatible `/embeddings` endpoint
+  (`openaiBaseUrl`, `openaiModel`, key read from `openaiApiKeyEnv`).
+- **Chinese↔English query bridge.** A small, auditable dictionary appends known
+  translations to the lexical channels; the search result reports `expanded`.
+
+### Compatibility
+
+- Pre-0.3 documents have no embedder identity; the first re-add re-embeds once
+  and records the identity, after which it is reused.
 ## [0.2.26] - 2026-11-05
 
 ### Changed

@@ -57,11 +57,16 @@ import { chunkIdOf, chunkKey, documentIdOf, documentKey, injectId, purgeId } fro
 import { chunkSizeHistogram, chunkText, findDuplicateChunks, type Chunk } from './quality/chunk-visual.ts'
 import { maximalMarginalRelevance } from './quality/diversity.ts'
 import { avoidLostMiddle, middlePenalty, positionBins } from './quality/lost-middle.ts'
+import { Bm25Index } from './quality/bm25.ts'
 import { scoreRelevance } from './quality/relevance.ts'
+import { expandQuery } from './expand.ts'
 import { validateCitations } from './quality/citation.ts'
 import { verifyReferences } from './quality/reference.ts'
 import { verifyPurge } from './quality/purge.ts'
 import { adoptMarkerSupport, appendAuditEvent, INJECT_EVENT, probeMarkerSupport, PURGE_EVENT, type LibraryInjectEvent, type LibraryPurgeEvent } from './events.ts'
+
+/** Reciprocal-rank-fusion constant (the standard 60). */
+const RRF_K = 60
 
 export const name = 'dsh-library'
 
@@ -70,7 +75,7 @@ export const inject = ['storageDomain', 'tools', 'commands']
 
 export { Config, resolveConfig, LIBRARY_NAME } from './config.ts'
 export type { ResolvedConfig, EmbeddingConfig, SearchConfig, InjectionConfig, CitationConfig, PurgeConfig, DiagnoseConfig } from './config.ts'
-export { embedHash, cosine, splitCommandLine, HashEmbedder, CommandEmbedder, OllamaEmbedder, probeOllama, resolveEmbedder } from './embedding.ts'
+export { embedHash, cosine, splitCommandLine, HashEmbedder, CommandEmbedder, OllamaEmbedder, OpenAiEmbedder, probeOllama, resolveEmbedder } from './embedding.ts'
 export type { Embedder, EmbedderResolution } from './embedding.ts'
 export { CHUNK_SIZE_BUCKETS, chunkSizeHistogram, chunkText, chunkHash, findDuplicateChunks } from './quality/chunk-visual.ts'
 export type { Chunk, ChunkSizeHistogram, ChunkDiagnostics } from './quality/chunk-visual.ts'
@@ -101,6 +106,12 @@ const documentSchema = zod.object({
   chunks: zod.array(zod.string()),
   chars: zod.number().int().nonnegative(),
   createdAt: zod.number().int().nonnegative(),
+  /** Embedder identity used for this document's vectors (absent on pre-0.3 indexes). */
+  embedderId: zod.string().optional(),
+  /** Chunk window used at import time (absent on pre-0.3 indexes). */
+  chunkSize: zod.number().int().positive().optional(),
+  /** Chunk overlap used at import time (absent on pre-0.3 indexes). */
+  chunkOverlap: zod.number().int().nonnegative().optional(),
 })
 type DocumentRecord = zod.infer<typeof documentSchema>
 
@@ -149,6 +160,10 @@ export interface LibraryAddResult {
   readonly name: string
   readonly chunks: number
   readonly chars: number
+  /** True when the identical document + embedder was already indexed (zero embed calls). */
+  readonly reused: boolean
+  /** Number of chunks embedded by this call (0 on a reuse). */
+  readonly embeddedChunks: number
 }
 
 /** One `library_remove` outcome, including the purge verification. */
@@ -185,6 +200,8 @@ export interface LibrarySearchHit {
 export interface LibrarySearchResult {
   readonly library: string
   readonly query: string
+  /** Bilingual terms appended to the lexical channels (empty when none matched). */
+  readonly expanded: readonly string[]
   readonly results: LibrarySearchHit[]
   /** True when the result page was injected into the calling agent. */
   readonly injected: boolean
@@ -278,6 +295,21 @@ export class LibraryStore {
     return this.deps.embedder.embed(texts)
   }
 
+  /** Stable identity of the current embedder + chunking configuration. */
+  private embedderIdentity(): string {
+    const embedding = this.config.embedding
+    switch (embedding.provider) {
+      case 'hash':
+        return `hash:${embedding.dims}`
+      case 'command':
+        return `command:${embedding.dims}:${embedding.command ?? ''}`
+      case 'ollama':
+        return `ollama:${embedding.dims}:${embedding.ollamaUrl}:${embedding.ollamaModel}`
+      case 'openai':
+        return `openai:${embedding.dims}:${embedding.openaiBaseUrl}:${embedding.openaiModel}`
+    }
+  }
+
   /**
    * Import one document: chunk it, embed the chunks, and store the records.
    * @param library - target library name.
@@ -308,6 +340,25 @@ export class LibraryStore {
       throw new Error(`document is ${bytes} bytes; the cap is ${this.config.maxFileBytes} (config maxFileBytes)`)
     }
     const documentId = documentIdOf(content)
+    const embedderId = this.embedderIdentity()
+    const existing = this.documents.get(documentKey(trimmedLibrary, documentId))
+    if (
+      existing !== undefined
+      && existing.embedderId === embedderId
+      && existing.chunkSize === this.config.chunkSize
+      && existing.chunkOverlap === this.config.chunkOverlap
+      && existing.chunks.every(chunkId => this.chunks.get(chunkKey(trimmedLibrary, chunkId)) !== undefined)
+    ) {
+      return {
+        library: trimmedLibrary,
+        documentId,
+        name: existing.name,
+        chunks: existing.chunks.length,
+        chars: existing.chars,
+        reused: true,
+        embeddedChunks: 0,
+      }
+    }
     const slices = chunkText(content, this.config.chunkSize, this.config.chunkOverlap)
     const embeddings = await this.embed(slices.map(slice => slice.text))
     const chunkIds = slices.map((_slice, index) => chunkIdOf(documentId, index))
@@ -329,8 +380,19 @@ export class LibraryStore {
       chunks: chunkIds,
       chars: content.length,
       createdAt: Date.now(),
+      embedderId,
+      chunkSize: this.config.chunkSize,
+      chunkOverlap: this.config.chunkOverlap,
     })
-    return { library: trimmedLibrary, documentId, name: docName.trim() || documentId, chunks: chunkIds.length, chars: content.length }
+    return {
+      library: trimmedLibrary,
+      documentId,
+      name: docName.trim() || documentId,
+      chunks: chunkIds.length,
+      chars: content.length,
+      reused: false,
+      embeddedChunks: slices.length,
+    }
   }
 
   /**
@@ -411,14 +473,41 @@ export class LibraryStore {
   async search(library: string, query: string, topK?: number): Promise<LibrarySearchHit[]> {
     const trimmedLibrary = assertLibraryName(library)
     const k = topK ?? this.config.search.topK
+    const expansion = expandQuery(query)
     const queryEmbedding = (await this.embed([query]))[0]!
     const records = this.chunksOf(trimmedLibrary)
-    const candidates: Candidate[] = records.map(chunk => {
-      const semantic = cosine(queryEmbedding, chunk.embedding)
-      const keyword = scoreRelevance(query, chunk.text)
-      const hybrid = this.config.search.hybridWeight * semantic + (1 - this.config.search.hybridWeight) * keyword
-      return { chunk, hybrid }
-    })
+    const semanticScores = new Map(records.map(chunk => [chunk.chunkId, cosine(queryEmbedding, chunk.embedding)]))
+    const keywordScores = new Map(records.map(chunk => [chunk.chunkId, scoreRelevance(expansion.lexicalQuery, chunk.text)]))
+    const bm25Scores = new Bm25Index(records.map(chunk => ({ id: chunk.chunkId, text: chunk.text }))).score(expansion.lexicalQuery)
+    let candidates: Candidate[]
+    if (this.config.search.fusion === 'rrf') {
+      const rankOf = (scores: ReadonlyMap<string, number>): Map<string, number> => {
+        const ranked = [...scores.entries()]
+          .filter(([, score]) => score > 0)
+          .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+        return new Map(ranked.map(([id], index) => [id, index]))
+      }
+      const bm25Rank = rankOf(bm25Scores)
+      const semanticRank = rankOf(semanticScores)
+      const fused = new Map<string, number>()
+      for (const record of records) {
+        let score = 0
+        const bm25Position = bm25Rank.get(record.chunkId)
+        if (bm25Position !== undefined) score += 1 / (RRF_K + bm25Position)
+        const semanticPosition = semanticRank.get(record.chunkId)
+        if (semanticPosition !== undefined) score += 1 / (RRF_K + semanticPosition)
+        fused.set(record.chunkId, score)
+      }
+      const max = Math.max(...fused.values(), 0)
+      candidates = records.map(record => ({ chunk: record, hybrid: max === 0 ? 0 : (fused.get(record.chunkId) ?? 0) / max }))
+    } else {
+      candidates = records.map(chunk => {
+        const semantic = semanticScores.get(chunk.chunkId) ?? 0
+        const keyword = keywordScores.get(chunk.chunkId) ?? 0
+        const hybrid = this.config.search.hybridWeight * semantic + (1 - this.config.search.hybridWeight) * keyword
+        return { chunk, hybrid }
+      })
+    }
     const reranked = maximalMarginalRelevance(
       candidates.map(candidate => ({
         id: candidate.chunk.chunkId,
@@ -676,12 +765,16 @@ function libraryAddTool(services: LibraryServices) {
           name: { type: 'string' as const },
           chunks: { type: 'integer' as const },
           chars: { type: 'integer' as const },
+          reused: { type: 'boolean' as const },
+          embeddedChunks: { type: 'integer' as const },
         },
         additionalProperties: false,
       },
       render(_args, value) {
         const result = value as LibraryAddResult
-        return [{ type: 'text' as const, text: `Indexed ${JSON.stringify(result.name)} into library ${result.library}: ${result.chunks} chunk(s), ${result.chars} chars. documentId: ${result.documentId}` }]
+        const prefix = result.reused ? 'Reused' : 'Indexed'
+        const suffix = result.reused ? ' (identical content + embedder; 0 embed calls)' : `, ${result.embeddedChunks} chunk(s) embedded`
+        return [{ type: 'text' as const, text: `${prefix} ${JSON.stringify(result.name)} into library ${result.library}: ${result.chunks} chunk(s), ${result.chars} chars${suffix}. documentId: ${result.documentId}` }]
       },
     },
     async execute(args, exec) {
@@ -807,6 +900,7 @@ function librarySearchTool(services: LibraryServices) {
           ok: { type: 'boolean' as const, const: true },
           library: { type: 'string' as const },
           query: { type: 'string' as const },
+          expanded: { type: 'array' as const, items: { type: 'string' as const } },
           results: {
             type: 'array' as const,
             items: {
@@ -837,6 +931,7 @@ function librarySearchTool(services: LibraryServices) {
     async execute(args, exec) {
       const parsed = args as { query: string; library: string; topK?: number; inject?: boolean }
       const hits = await store.search(parsed.library, parsed.query, parsed.topK)
+      const expanded = [...expandQuery(parsed.query).translations]
       const wantInject = parsed.inject === true && config.injection.enabled
       let injected = false
       let page = ''
@@ -862,7 +957,7 @@ function librarySearchTool(services: LibraryServices) {
         })
         injected = true
       }
-      return { ok: true as const, library: parsed.library, query: parsed.query, results: hits, injected }
+      return { ok: true as const, library: parsed.library, query: parsed.query, expanded, results: hits, injected }
     },
   })
 }

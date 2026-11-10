@@ -36,7 +36,7 @@ dsh plugin --profile <name> add dsh-library
 
 ## 它是什么
 
-`dsh-library` 把你的 md/txt 文档变成 agent 可查询的本地知识库。`library_add` 按路径读入文档、做滑窗切片并写入宿主的 `dsh_library` 存储域；`library_search` 用语义 + 关键词混合打分、MMR 多样性重排、相关性过滤与中段规避，返回带 `[n]` 来源标记的结果页。引用可以用 `library_cite_check` 逐条核验，删除可以用 `library_remove` 的清除验证探针复查残留。默认零模型下载、零网络请求——打分是确定性哈希与词法数学。
+`dsh-library` 把你的 md/txt 文档变成 agent 可查询的本地知识库。`library_add` 按路径读入文档、做滑窗切片并写入宿主的 `dsh_library` 存储域，内容 + 嵌入器 + 分块参数都没变时直接复用索引（零嵌入调用）；`library_search` 用语义 + 关键词混合打分、MMR 多样性重排、相关性过滤与中段规避，返回带 `[n]` 来源标记的结果页。引用可以用 `library_cite_check` 逐条核验，删除可以用 `library_remove` 的清除验证探针复查残留。默认零模型下载、零网络请求——打分是确定性哈希与词法数学。
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-library-flow-v5-dark.svg">
@@ -86,7 +86,7 @@ dsh plugin --profile <name> add dsh-library
 `dsh-library` 把本地 md/txt 文档变成可查询的知识库，并带一套 agent 可以核验的质量管线：
 
 - **`library_add` / `library_remove` / `library_list`** —— 按路径导入文档（分块 + 嵌入）、删除文档并做**清除验证**（用被删内容的签名探测剩余索引，残留即报告）、列出文档元数据。
-- **`library_search`** —— 语义 + 关键词混合排序、最大边际相关多样性重排、相关性过滤与**中段丢失规避**（最强切片钉在首尾）。`inject: true` 时结果页注入调用 agent；每条命中带 `[n]` 来源标记，注入可从 `library/inject` 会话事件重建（受宿主门控，见「权限与数据」）。
+- **`library_search`** —— **BM25 + 语义倒数排名融合**（默认；`search.fusion: weighted` 保留旧 hybridWeight），可审计的**中英查询桥**，最大边际相关多样性重排、相关性过滤与**中段丢失规避**（最强切片钉在首尾）。`inject: true` 时结果页注入调用 agent；每条命中带 `[n]` 来源标记，注入可从 `library/inject` 会话事件重建（受宿主门控，见「权限与数据」）。
 - **`library_cite_check`** —— 用模糊词面匹配 + 语义相似度双重校验答案中的 `[n]` 引用。
 - **`library_diagnose`** —— 切片大小直方图、近似重复切片对、自检索探针与中段惩罚信号。
 - **`/library`** —— 每个知识库一行索引摘要。
@@ -154,9 +154,13 @@ isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": 
 | `chunkSize` | `900` | 滑窗切片大小（字符，≤ 4000） |
 | `chunkOverlap` | `120` | 相邻窗口重叠；必须小于 `chunkSize` |
 | `maxFileBytes` | `5242880` | 超过该大小的文件在 `library_add` 被拒绝 |
-| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程，需 `embedding.command`）、`ollama`（本地 Ollama，探测不可用时降级回 `hash`） |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`；只填默认值，显式字段优先 |
+| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程）、`ollama`（本地，不可用降级回 hash）、`openai`（OpenAI 兼容 `/embeddings`） |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI 兼容端点与模型 |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | 存 key 的环境变量名；key 不落配置 |
 | `search.topK` | `8` | 完整管线后返回的结果数 |
-| `search.hybridWeight` | `0.6` | 0 = 仅关键词，1 = 仅语义 |
+| `search.fusion` | `rrf` | `rrf` = BM25 + 语义倒数排名融合（按最佳命中归一）；`weighted` = 旧 hybridWeight |
+| `search.hybridWeight` | `0.6` | 旧权重，仅在 `search.fusion = weighted` 时使用 |
 | `search.minRelevance` | `0.15` | 低于该相关性阈值的切片被过滤 |
 | `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` 注入行为与预算 |
 
@@ -169,12 +173,16 @@ isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": 
 | `chunkOverlap` | `120` | 相邻窗口重叠；必须小于 `chunkSize` |
 | `maxFileBytes` | `5242880` | 超过该大小的文件在 `library_add` 被拒绝 |
 | `embedding.dims` | `256` | 哈希嵌入维度（≥ 8） |
-| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程，需 `embedding.command`）、`ollama`（本地 Ollama，探测不可用时降级回 `hash`） |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`；只填默认值，显式字段优先 |
+| `embedding.provider` | `hash` | 嵌入后端：`hash`（内置，零下载）、`command`（外部子进程）、`ollama`（本地，不可用降级回 hash）、`openai`（OpenAI 兼容 `/embeddings`） |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI 兼容端点与模型 |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | 存 key 的环境变量名；key 不落配置 |
 | `embedding.command` | `''` | 可选外部嵌入命令（空格分隔 argv、无 shell）走 `ctx.subprocess`；设置后即选择 `command` 后端 |
 | `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | `ollama` 后端的本地 Ollama 端点与模型（零云端） |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | 嵌入子进程预算 |
 | `search.topK` | `8` | 完整管线后返回的结果数 |
-| `search.hybridWeight` | `0.6` | 0 = 仅关键词，1 = 仅语义 |
+| `search.fusion` | `rrf` | `rrf` = BM25 + 语义倒数排名融合（按最佳命中归一）；`weighted` = 旧 hybridWeight |
+| `search.hybridWeight` | `0.6` | 旧权重，仅在 `search.fusion = weighted` 时使用 |
 | `search.minRelevance` | `0.15` | 低于该相关性阈值的切片被过滤 |
 | `search.diversityLambda` | `0.5` | MMR 权衡：1 = 纯相关，0 = 纯多样 |
 | `search.lostMiddleHead` / `lostMiddleTail` | `1` / `1` | 最强切片钉在首 / 尾 |
@@ -263,7 +271,7 @@ profile patch 覆盖示例：
 
 | 方面 | 状态 |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1`（2026-09-24 核验：双 typecheck 尺子 + 89 项测试 + self-contained/artifacts 门；peer 三段式 `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`）。全族唯一已实跑 alpha.2 宿主冒烟的仓（2026-09-11）。 |
+| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1`（2026-09-24 核验：双 typecheck 尺子 + 108 项测试 + self-contained/artifacts 门；peer 三段式 `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`）。全族唯一已实跑 alpha.2 宿主冒烟的仓（2026-09-11）。 |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | 存储 | 任意 storage-domain 后端（JSON 或 SQLite）；索引存放在宿主的存储域中 |
 | 模型 | 无需任何模型——内置嵌入为确定性哈希（零下载） |

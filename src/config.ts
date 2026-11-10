@@ -19,6 +19,10 @@ export const DEFAULT_MAX_FILE_BYTES = 5 * 1024 * 1024
 /** Absolute safety bound on one stored chunk (chunkSize must stay below it). */
 export const MAX_CHUNK_CHARS = 4000
 /** Hash-embedding dimensionality used by the zero-download local embedder. */
+export const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1'
+export const DEFAULT_OPENAI_MODEL = 'text-embedding-3-small'
+export const DEFAULT_OPENAI_DIMS = 1536
+export const DEFAULT_OPENAI_KEY_ENV = 'OPENAI_API_KEY'
 export const DEFAULT_EMBEDDING_DIMS = 256
 /** Local Ollama base URL (zero cloud — only this localhost endpoint is ever contacted). */
 export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434'
@@ -54,7 +58,13 @@ export const DEFAULT_DIAGNOSE_POSITION_BINS = 5
 
 /** Embedder selection: built-in hash embedding, an external command, or a local Ollama server. */
 export interface EmbeddingConfig {
-  /** Hash-embedding dimensionality (built-in embedder only). Must be ≥ 8. */
+  /**
+   * Named preset: `hash` (zero-download default), `ollama` (local server),
+   * `openai` (OpenAI-compatible embeddings), or `custom` (use the explicit
+   * provider/fields). A preset only fills defaults; explicit fields win.
+   */
+  preset?: 'hash' | 'ollama' | 'openai' | 'custom'
+  /** Vector dimensionality. Must be ≥ 8; `openai` defaults to 1536. */
   dims?: number
   /**
    * Which embedder backend to use: `hash` (built-in, zero downloads), `command`
@@ -62,7 +72,7 @@ export interface EmbeddingConfig {
    * local Ollama server, probed and degraded to `hash` when unavailable).
    * When `command` is set, the command provider wins regardless of this field.
    */
-  provider?: 'hash' | 'command' | 'ollama'
+  provider?: 'hash' | 'command' | 'ollama' | 'openai'
   /**
    * Optional external embedder command line (space-separated, no shell
    * interpretation; executed through `ctx.subprocess`). The command must read
@@ -77,6 +87,12 @@ export interface EmbeddingConfig {
   ollamaUrl?: string
   /** Ollama embedding model name (default `nomic-embed-text`). */
   ollamaModel?: string
+  /** OpenAI-compatible base URL (default `https://api.openai.com/v1`). */
+  openaiBaseUrl?: string
+  /** OpenAI-compatible embedding model (default `text-embedding-3-small`). */
+  openaiModel?: string
+  /** Environment variable holding the API key (default `OPENAI_API_KEY`); never stored. */
+  openaiApiKeyEnv?: string
   /** Cooperative timeout for one embedder invocation (ms). */
   timeoutMs?: number
   /** Terminate-escalation grace handed to the subprocess seam (ms). */
@@ -96,6 +112,12 @@ export interface SearchConfig {
    * scores are each normalized to 0..1 before combining.
    */
   hybridWeight?: number
+  /**
+   * How the lexical and semantic channels are fused: `rrf` (reciprocal-rank
+   * fusion over BM25 + semantic, normalized to the best hit) or `weighted`
+   * (the legacy hybridWeight combination). Default `rrf`.
+   */
+  fusion?: 'rrf' | 'weighted'
   /** Chunks scoring below this relevance threshold are filtered out (fail closed to fewer, better results). */
   minRelevance?: number
   /** Diversity re-rank weight: 1 = pure relevance order, 0 = pure diversity. */
@@ -168,11 +190,15 @@ export interface Config {
 
 /** Resolved embedding config: defaults applied, `command` explicitly optional. */
 export interface ResolvedEmbeddingConfig {
+  readonly preset: 'hash' | 'ollama' | 'openai' | 'custom'
   readonly dims: number
-  readonly provider: 'hash' | 'command' | 'ollama'
+  readonly provider: 'hash' | 'command' | 'ollama' | 'openai'
   readonly command: string | undefined
   readonly ollamaUrl: string
   readonly ollamaModel: string
+  readonly openaiBaseUrl: string
+  readonly openaiModel: string
+  readonly openaiApiKeyEnv: string
   readonly timeoutMs: number
   readonly graceMs: number
   readonly maxOutputBytes: number
@@ -182,6 +208,7 @@ export interface ResolvedEmbeddingConfig {
 /** Resolved search config after defaulting. */
 export interface ResolvedSearchConfig {
   readonly topK: number
+  readonly fusion: 'rrf' | 'weighted'
   readonly hybridWeight: number
   readonly minRelevance: number
   readonly diversityLambda: number
@@ -235,21 +262,29 @@ export const Config: z<Config> = z.object({
   chunkOverlap: z.number().default(DEFAULT_CHUNK_OVERLAP),
   maxFileBytes: z.number().default(DEFAULT_MAX_FILE_BYTES),
   embedding: z.object({
-    dims: z.number().default(DEFAULT_EMBEDDING_DIMS),
-    provider: z.union([z.const('hash'), z.const('command'), z.const('ollama')]).default('hash'),
+    preset: z.union([z.const('hash'), z.const('ollama'), z.const('openai'), z.const('custom')]).default('custom'),
+    dims: z.number(),
+    provider: z.union([z.const('hash'), z.const('command'), z.const('ollama'), z.const('openai')]),
     command: z.string(),
     ollamaUrl: z.string().default(DEFAULT_OLLAMA_URL),
     ollamaModel: z.string().default(DEFAULT_OLLAMA_MODEL),
+    openaiBaseUrl: z.string().default(DEFAULT_OPENAI_BASE_URL),
+    openaiModel: z.string().default(DEFAULT_OPENAI_MODEL),
+    openaiApiKeyEnv: z.string().default(DEFAULT_OPENAI_KEY_ENV),
     timeoutMs: z.number().default(DEFAULT_EMBEDDING_TIMEOUT_MS),
     graceMs: z.number().default(DEFAULT_EMBEDDING_GRACE_MS),
     maxOutputBytes: z.number().default(DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES),
     maxBatchItems: z.number().default(DEFAULT_EMBEDDING_MAX_BATCH),
   }).default({
+    preset: 'custom',
     dims: DEFAULT_EMBEDDING_DIMS,
     provider: 'hash',
     command: '',
     ollamaUrl: DEFAULT_OLLAMA_URL,
     ollamaModel: DEFAULT_OLLAMA_MODEL,
+    openaiBaseUrl: DEFAULT_OPENAI_BASE_URL,
+    openaiModel: DEFAULT_OPENAI_MODEL,
+    openaiApiKeyEnv: DEFAULT_OPENAI_KEY_ENV,
     timeoutMs: DEFAULT_EMBEDDING_TIMEOUT_MS,
     graceMs: DEFAULT_EMBEDDING_GRACE_MS,
     maxOutputBytes: DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES,
@@ -257,6 +292,7 @@ export const Config: z<Config> = z.object({
   }),
   search: z.object({
     topK: z.number().default(DEFAULT_SEARCH_TOPK),
+    fusion: z.union([z.const('rrf'), z.const('weighted')]).default('rrf'),
     hybridWeight: z.number().default(DEFAULT_SEARCH_HYBRID_WEIGHT),
     minRelevance: z.number().default(DEFAULT_SEARCH_MIN_RELEVANCE),
     diversityLambda: z.number().default(DEFAULT_SEARCH_DIVERSITY_LAMBDA),
@@ -265,6 +301,7 @@ export const Config: z<Config> = z.object({
     maxResultChars: z.number().default(DEFAULT_SEARCH_MAX_RESULT_CHARS),
   }).default({
     topK: DEFAULT_SEARCH_TOPK,
+    fusion: 'rrf',
     hybridWeight: DEFAULT_SEARCH_HYBRID_WEIGHT,
     minRelevance: DEFAULT_SEARCH_MIN_RELEVANCE,
     diversityLambda: DEFAULT_SEARCH_DIVERSITY_LAMBDA,
@@ -336,10 +373,7 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     throw new TypeError(`dsh-library: chunkOverlap (${chunkOverlap}) must be smaller than chunkSize (${chunkSize})`)
   }
   const embedding = config.embedding ?? {}
-  const dims = embedding.dims ?? DEFAULT_EMBEDDING_DIMS
-  if (!Number.isSafeInteger(dims) || dims < 8) {
-    throw new TypeError(`dsh-library: embedding.dims must be an integer ≥ 8, got ${String(dims)}`)
-  }
+  const preset = embedding.preset ?? 'custom'
   for (const [name, value] of [
     ['embedding.timeoutMs', embedding.timeoutMs ?? DEFAULT_EMBEDDING_TIMEOUT_MS],
     ['embedding.graceMs', embedding.graceMs ?? DEFAULT_EMBEDDING_GRACE_MS],
@@ -350,8 +384,9 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
   }
   const rawCommand = embedding.command
   const command = rawCommand === undefined || rawCommand.trim().length === 0 ? undefined : rawCommand.trim()
-  const rawProvider = embedding.provider
-  let provider: 'hash' | 'command' | 'ollama'
+  const presetProvider = preset === 'hash' ? 'hash' : preset === 'ollama' ? 'ollama' : preset === 'openai' ? 'openai' : undefined
+  const rawProvider = embedding.provider ?? presetProvider
+  let provider: 'hash' | 'command' | 'ollama' | 'openai'
   if (command !== undefined) {
     provider = 'command' // an explicit command wins over any provider spelling
   } else if (rawProvider === undefined || rawProvider === 'hash') {
@@ -360,8 +395,14 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     throw new TypeError('dsh-library: embedding.provider=command requires embedding.command to be set')
   } else if (rawProvider === 'ollama') {
     provider = 'ollama'
+  } else if (rawProvider === 'openai') {
+    provider = 'openai'
   } else {
-    throw new TypeError(`dsh-library: embedding.provider must be hash|command|ollama, got ${JSON.stringify(rawProvider)}`)
+    throw new TypeError(`dsh-library: embedding.provider must be hash|command|ollama|openai, got ${JSON.stringify(rawProvider)}`)
+  }
+  const dims = embedding.dims ?? (provider === 'openai' ? DEFAULT_OPENAI_DIMS : DEFAULT_EMBEDDING_DIMS)
+  if (!Number.isSafeInteger(dims) || dims < 8) {
+    throw new TypeError(`dsh-library: embedding.dims must be an integer ≥ 8, got ${String(dims)}`)
   }
   const ollamaUrl = (embedding.ollamaUrl ?? DEFAULT_OLLAMA_URL).trim()
   const ollamaModel = (embedding.ollamaModel ?? DEFAULT_OLLAMA_MODEL).trim()
@@ -369,7 +410,19 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     if (ollamaUrl.length === 0) throw new TypeError('dsh-library: embedding.ollamaUrl must be a non-empty URL when provider=ollama')
     if (ollamaModel.length === 0) throw new TypeError('dsh-library: embedding.ollamaModel must be a non-empty model name when provider=ollama')
   }
+  const openaiBaseUrl = (embedding.openaiBaseUrl ?? DEFAULT_OPENAI_BASE_URL).trim().replace(/\/+$/u, '')
+  const openaiModel = (embedding.openaiModel ?? DEFAULT_OPENAI_MODEL).trim()
+  const openaiApiKeyEnv = (embedding.openaiApiKeyEnv ?? DEFAULT_OPENAI_KEY_ENV).trim()
+  if (provider === 'openai') {
+    if (!/^https?:\/\//u.test(openaiBaseUrl)) throw new TypeError('dsh-library: embedding.openaiBaseUrl must be an http(s) URL when provider=openai')
+    if (openaiModel.length === 0) throw new TypeError('dsh-library: embedding.openaiModel must be a non-empty model name when provider=openai')
+    if (openaiApiKeyEnv.length === 0) throw new TypeError('dsh-library: embedding.openaiApiKeyEnv must name an environment variable when provider=openai')
+  }
   const search = config.search ?? {}
+  const fusion = search.fusion ?? 'rrf'
+  if (fusion !== 'rrf' && fusion !== 'weighted') {
+    throw new TypeError(`dsh-library: search.fusion must be rrf|weighted, got ${JSON.stringify(fusion)}`)
+  }
   const topK = search.topK ?? DEFAULT_SEARCH_TOPK
   assertPositiveInteger('search.topK', topK)
   for (const [name, value] of [
@@ -426,11 +479,15 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     chunkOverlap,
     maxFileBytes: config.maxFileBytes ?? DEFAULT_MAX_FILE_BYTES,
     embedding: {
+      preset,
       dims,
       provider,
       command: command === undefined ? undefined : command.trim(),
       ollamaUrl,
       ollamaModel,
+      openaiBaseUrl,
+      openaiModel,
+      openaiApiKeyEnv,
       timeoutMs: embedding.timeoutMs ?? DEFAULT_EMBEDDING_TIMEOUT_MS,
       graceMs: embedding.graceMs ?? DEFAULT_EMBEDDING_GRACE_MS,
       maxOutputBytes: embedding.maxOutputBytes ?? DEFAULT_EMBEDDING_MAX_OUTPUT_BYTES,
@@ -438,6 +495,7 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     },
     search: {
       topK,
+      fusion,
       hybridWeight,
       minRelevance,
       diversityLambda,
