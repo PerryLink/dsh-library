@@ -154,8 +154,12 @@ Claves más usadas:
 | `chunkSize` | `900` | Tamaño del chunk en caracteres (ventana deslizante, ≤ 4000) |
 | `chunkOverlap` | `120` | Solapamiento entre ventanas; debe ser menor que `chunkSize` |
 | `maxFileBytes` | `5242880` | Archivos mayores se rechazan en `library_add` |
-| `embedding.provider` | `hash` | Backend del embedder: `hash` (integrado, cero descargas), `command` (subproceso externo, requiere `embedding.command`), `ollama` (Ollama local, probado y degradado a `hash` si es inalcanzable) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; solo aporta valores por defecto, los campos explícitos mandan |
+| `embedding.provider` | `hash` | Backend del embedder: `hash` (integrado, cero descargas), `command` (subproceso externo, requiere `embedding.command`), `ollama` (Ollama local, probado y degradado a `hash` si es inalcanzable) o `openai` (`/embeddings` compatible con OpenAI) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | Endpoint y modelo compatibles con OpenAI |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | Nombre de la variable de entorno que guarda la clave; la clave nunca se escribe en la configuración |
 | `search.topK` | `8` | Resultados devueltos tras el pipeline completo |
+| `search.fusion` | `rrf` | `rrf` = fusión BM25 + semántica por rango recíproco (normalizada por el mejor resultado); `weighted` = el antiguo hybridWeight |
 | `search.hybridWeight` | `0.6` | 0 = solo palabras clave, 1 = solo semántica |
 | `search.minRelevance` | `0.15` | Los chunks bajo este umbral de relevancia se filtran |
 | `injection.enabled` / `maxChars` | `true` / `12000` | Comportamiento y presupuesto de inyección de `library_search` |
@@ -169,11 +173,15 @@ Claves más usadas:
 | `chunkOverlap` | `120` | Solapamiento entre ventanas; debe ser menor que `chunkSize` |
 | `maxFileBytes` | `5242880` | Archivos mayores se rechazan en `library_add` |
 | `embedding.dims` | `256` | Dimensionalidad del hash embedding (≥ 8) |
-| `embedding.provider` | `hash` | Backend del embedder: `hash` (integrado, cero descargas), `command` (subproceso externo, requiere `embedding.command`), `ollama` (Ollama local, probado y degradado a `hash` si es inalcanzable) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; solo aporta valores por defecto, los campos explícitos mandan |
+| `embedding.provider` | `hash` | Backend del embedder: `hash` (integrado, cero descargas), `command` (subproceso externo, requiere `embedding.command`), `ollama` (Ollama local, probado y degradado a `hash` si es inalcanzable) o `openai` (`/embeddings` compatible con OpenAI) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | Endpoint y modelo compatibles con OpenAI |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | Nombre de la variable de entorno que guarda la clave; la clave nunca se escribe en la configuración |
 | `embedding.command` | `''` | Comando de embedder externo opcional (argv separado por espacios, sin shell) sobre `ctx.subprocess`; configurarlo selecciona el backend `command` |
 | `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | Endpoint y modelo de Ollama local para el backend `ollama` (cero nube) |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | Presupuesto del subproceso del embedder |
 | `search.topK` | `8` | Resultados devueltos tras el pipeline completo |
+| `search.fusion` | `rrf` | `rrf` = fusión BM25 + semántica por rango recíproco (normalizada por el mejor resultado); `weighted` = el antiguo hybridWeight |
 | `search.hybridWeight` | `0.6` | 0 = solo palabras clave, 1 = solo semántica |
 | `search.minRelevance` | `0.15` | Los chunks bajo este umbral de relevancia se filtran |
 | `search.diversityLambda` | `0.5` | Compensación MMR: 1 = relevancia pura, 0 = diversidad pura |

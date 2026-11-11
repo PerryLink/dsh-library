@@ -154,8 +154,12 @@ isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": 
 | `chunkSize` | `900` | स्लाइडिंग-विंडो चंक आकार वर्णों में (≤ 4000) |
 | `chunkOverlap` | `120` | लगातार विंडो के बीच ओवरलैप; `chunkSize` से छोटा होना चाहिए |
 | `maxFileBytes` | `5242880` | इससे बड़ी फ़ाइलें `library_add` पर अस्वीकार होती हैं |
-| `embedding.provider` | `hash` | एम्बेडर बैकएंड: `hash` (अंतर्निहित, शून्य डाउनलोड), `command` (बाहरी उपप्रक्रिया, `embedding.command` आवश्यक), `ollama` (स्थानीय Ollama, अनुपलब्ध होने पर `hash` में डिग्रेड) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; केवल डिफ़ॉल्ट मान देता है, स्पष्ट फ़ील्ड प्राथमिक |
+| `embedding.provider` | `hash` | एम्बेडर बैकएंड: `hash` (अंतर्निहित, शून्य डाउनलोड), `command` (बाहरी उपप्रक्रिया, `embedding.command` आवश्यक), `ollama` (स्थानीय Ollama, अनुपलब्ध होने पर `hash` में डिग्रेड) या `openai` (OpenAI-संगत `/embeddings`) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI-संगत एंडपॉइंट व मॉडल |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | कुंजी रखने वाले वातावरण-चर का नाम; कुंजी कॉन्फ़िग में कभी नहीं लिखी जाती |
 | `search.topK` | `8` | पूरी पाइपलाइन के बाद लौटे परिणाम |
+| `search.fusion` | `rrf` | `rrf` = BM25 + सिमेंटिक reciprocal-rank फ़्यूज़न (सर्वोत्तम हिट से सामान्यीकृत); `weighted` = पुराना hybridWeight |
 | `search.hybridWeight` | `0.6` | 0 = केवल कीवर्ड, 1 = केवल सिमेंटिक |
 | `search.minRelevance` | `0.15` | इस प्रासंगिकता सीमा से नीचे के चंक छाँटे जाते हैं |
 | `injection.enabled` / `maxChars` | `true` / `12000` | `library_search` इंजेक्शन व्यवहार व बजट |
@@ -169,11 +173,15 @@ isError=true; error.message=cannot read "/nonexistent/dsh-library-missing.txt": 
 | `chunkOverlap` | `120` | लगातार विंडो के बीच ओवरलैप; `chunkSize` से छोटा होना चाहिए |
 | `maxFileBytes` | `5242880` | इससे बड़ी फ़ाइलें `library_add` पर अस्वीकार होती हैं |
 | `embedding.dims` | `256` | हैश-एम्बेडिंग आयाम (≥ 8) |
-| `embedding.provider` | `hash` | एम्बेडर बैकएंड: `hash` (अंतर्निहित, शून्य डाउनलोड), `command` (बाहरी उपप्रक्रिया, `embedding.command` आवश्यक), `ollama` (स्थानीय Ollama, अनुपलब्ध होने पर `hash` में डिग्रेड) |
+| `embedding.preset` | `custom` | `hash` / `ollama` / `openai` / `custom`; केवल डिफ़ॉल्ट मान देता है, स्पष्ट फ़ील्ड प्राथमिक |
+| `embedding.provider` | `hash` | एम्बेडर बैकएंड: `hash` (अंतर्निहित, शून्य डाउनलोड), `command` (बाहरी उपप्रक्रिया, `embedding.command` आवश्यक), `ollama` (स्थानीय Ollama, अनुपलब्ध होने पर `hash` में डिग्रेड) या `openai` (OpenAI-संगत `/embeddings`) |
+| `embedding.openaiBaseUrl` / `openaiModel` | `https://api.openai.com/v1` / `text-embedding-3-small` | OpenAI-संगत एंडपॉइंट व मॉडल |
+| `embedding.openaiApiKeyEnv` | `OPENAI_API_KEY` | कुंजी रखने वाले वातावरण-चर का नाम; कुंजी कॉन्फ़िग में कभी नहीं लिखी जाती |
 | `embedding.command` | `''` | वैकल्पिक बाहरी एम्बेडर कमांड (स्पेस-सेपरेटेड argv, कोई शेल नहीं) `ctx.subprocess` से; सेट करने पर `command` बैकएंड चयनित होता है |
 | `embedding.ollamaUrl` / `ollamaModel` | `http://127.0.0.1:11434` / `nomic-embed-text` | `ollama` बैकएंड के लिए स्थानीय Ollama एंडपॉइंट व मॉडल (शून्य क्लाउड) |
 | `embedding.timeoutMs` / `graceMs` / `maxOutputBytes` / `maxBatchItems` | `30000` / `1000` / `1048576` / `64` | एम्बेडर उपप्रक्रिया बजट |
 | `search.topK` | `8` | पूरी पाइपलाइन के बाद लौटे परिणाम |
+| `search.fusion` | `rrf` | `rrf` = BM25 + सिमेंटिक reciprocal-rank फ़्यूज़न (सर्वोत्तम हिट से सामान्यीकृत); `weighted` = पुराना hybridWeight |
 | `search.hybridWeight` | `0.6` | 0 = केवल कीवर्ड, 1 = केवल सिमेंटिक |
 | `search.minRelevance` | `0.15` | इस प्रासंगिकता सीमा से नीचे के चंक छाँटे जाते हैं |
 | `search.diversityLambda` | `0.5` | MMR संतुलन: 1 = शुद्ध प्रासंगिकता, 0 = शुद्ध विविधता |
