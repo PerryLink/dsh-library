@@ -109,22 +109,35 @@ export function adoptMarkerSupport(verdict: MarkerSupport): void {
 export async function probeMarkerSupport(createSession: () => Session): Promise<MarkerSupport> {
   try {
     const session = createSession()
-    const append = session.append as AppendProbe
-    const record = append.call(session, INJECT_EVENT, {
+    const record = appendWithIgnorableMarker(session, INJECT_EVENT, {
       injectId: 'probe',
       library: 'probe',
       query: 'probe',
       chunks: [],
       chars: 0,
-    }, { ignorable: true })
+    })
     return isMarkedRecord(record) ? 'supported' : 'unsupported'
   } catch {
     return 'unsupported'
   }
 }
 
-/** Loose append shape used by the probe and the marked path. */
-type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
+/**
+ * Invoke the legacy untyped single-event append shape: `(type, data,
+ * { ignorable: true })`. rc.3 overloaded `Session.append` with a batch form
+ * (`append(inputs: readonly SessionEventInput[])`), so there is no longer a
+ * type-compatible signature to assert against; reflection keeps this
+ * runtime-only probe path intact. On a host without the envelope the extra
+ * argument is dropped (or read as surface metadata, which an audit event never
+ * sets), exactly the behaviour the capability probe observes.
+ * @param session - the session to append on.
+ * @param type - the audit event type.
+ * @param data - the audit payload.
+ * @returns the appended record as the host returned it.
+ */
+function appendWithIgnorableMarker(session: Session, type: string, data: unknown): unknown {
+  return Reflect.apply(session.append, session, [type, data, { ignorable: true }])
+}
 
 /** Whether a returned append record carries the stamped marker. */
 function isMarkedRecord(record: unknown): boolean {
@@ -155,8 +168,7 @@ export function appendAuditEvent(
     return 'appended'
   }
   if (markerSupport === 'supported') {
-    const append = session.append as AppendProbe
-    append.call(session, type, data, { ignorable: true })
+    appendWithIgnorableMarker(session, type, data)
     return 'appended-marked'
   }
   if (!warnedUnmarkedHost) {
