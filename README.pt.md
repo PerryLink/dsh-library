@@ -9,7 +9,7 @@
 
 **Transforme seus documentos md/txt locais em uma biblioteca de recuperação citável e verificável.**
 
-Uma base de conhecimento local de documentos para DeepSeek Harness: importe por caminho, fatie com janela deslizante, incruste localmente e obtenha resultados de busca híbrida cujas citações `[n]` — e cujas remoções — podem ser conferidas.
+Uma base de conhecimento local de documentos para DeepSeek Harness: importe por caminho, fatie com janela deslizante, incruste localmente e obtenha resultados de busca híbrida cujas citações `dsh-v0.2.2-rc.4`（2026-11-18）；`[n]` — e cujas remoções — podem ser conferidas.
 
 [Instalar](#instalação-em-três-passos) · [Configuração](#configuração) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 

@@ -9,7 +9,7 @@
 
 **Turn your local md/txt documents into a citable, verifiable retrieval library.**
 
-A local document knowledge base for DeepSeek Harness: import by path, chunk with a sliding window, embed locally, and get hybrid search results whose `[n]` citations — and deletions — can be checked.
+A local document knowledge base for DeepSeek Harness: import by path, chunk with a sliding window, embed locally, and get hybrid search results whose `dsh-v0.2.2-rc.4`（2026-11-18）；`[n]` citations — and deletions — can be checked.
 
 [Install](#three-step-setup) · [Configuration](#configuration) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 
