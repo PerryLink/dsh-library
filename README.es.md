@@ -271,7 +271,7 @@ La ruta por defecto no hace llamadas a modelos ni peticiones de red; el coste es
 
 | Superficie | Estado |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (verificado el 2026-09-25: doble typecheck + 89 pruebas + puertas self-contained/artifacts; rango de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Único paquete de la familia con un smoke real de host alpha.2 (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.2.2-rc.4` (verificado el 2026-11-18: doble typecheck + 89 pruebas + puertas self-contained/artifacts; rango de peers `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0 \|\| >=0.2.2-0 <0.3.0`). Único paquete de la familia con un smoke real de host alpha.2 (2026-11-18). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Almacenamiento | Cualquier backend de storage-domain (JSON o SQLite); el índice vive en el dominio de almacenamiento del host |
 | Modelos | Ninguno requerido — el embedder integrado es hash determinista (cero descargas) |

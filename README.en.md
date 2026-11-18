@@ -272,7 +272,7 @@ The default path makes no model calls and no network requests; the cost is one s
 
 | Surface | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (verified 2026-09-25: dual typecheck rulers + 108 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0`). Home of the family's only exercised alpha.2 host smoke (2026-09-11). |
+| Harness | DeepSeek Harness `dsh-v0.2.2-rc.4` (verified 2026-11-18: dual typecheck rulers + 108 tests + self-contained/artifacts gates; peer range `>=0.1.2-rc.1 <0.2.0 \|\| >=0.1.5-alpha.1 <0.2.0 \|\| >=0.1.6-0 <0.2.0 \|\| >=0.1.7-0 <0.2.0 \|\| >=0.2.2-0 <0.3.0`). Home of the family's only exercised alpha.2 host smoke (2026-11-18). |
 | Node | `^22.19.0 \|\| >=24.0.0` |
 | Storage | Any storage-domain backend (JSON or SQLite); the index lives in the host's storage domain |
 | Models | None required — the built-in embedder is deterministic hashing (zero downloads) |
