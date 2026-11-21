@@ -43,6 +43,11 @@ dsh plugin --profile <name> add dsh-library
   <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="Estructura de dsh-library: una barra central con el dominio de almacenamiento dsh_library (documents / chunks / purges); la banda de ingesta, encima, lleva una ruta por el control de tamaño, los chunks de ventana deslizante y el embedder hasta ese dominio; la banda de recuperación, debajo, mete la consulta y los chunks de ese mismo dominio en puntuación híbrida, re-rank MMR, filtro de relevancia y fijado de cabeza y cola hasta producir la página con marcadores [n]; fuera de la página, dos sondas verifican citas y eliminaciones">
 </picture>
 
+![dsh-library: ejecución real de terminal](docs/assets/dsh-library-demo.gif)
+
+*Repetición animada de una ejecución real registrada en este repositorio.*
+
+
 ## Instalación en tres pasos
 
 1. **Instala** (elige un canal):

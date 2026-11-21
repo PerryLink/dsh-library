@@ -36,6 +36,10 @@ dsh plugin --profile <name> add dsh-library
 
 ## 它是什么
 
+![dsh-library 真实终端运行](docs/assets/dsh-library-demo.gif)
+
+*本仓库一次真实运行的动图回放。*
+
 `dsh-library` 把你的 md/txt 文档变成 agent 可查询的本地知识库。`library_add` 按路径读入文档、做滑窗切片并写入宿主的 `dsh_library` 存储域，内容 + 嵌入器 + 分块参数都没变时直接复用索引（零嵌入调用）；`library_search` 用语义 + 关键词混合打分、MMR 多样性重排、相关性过滤与中段规避，返回带 `[n]` 来源标记的结果页。引用可以用 `library_cite_check` 逐条核验，删除可以用 `library_remove` 的清除验证探针复查残留。默认零模型下载、零网络请求——打分是确定性哈希与词法数学。
 
 <picture>

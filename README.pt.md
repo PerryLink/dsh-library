@@ -43,6 +43,11 @@ O `dsh-library` transforma seus documentos md/txt em uma base de conhecimento lo
   <img src="docs/assets/dsh-library-flow-v5-light.svg" width="100%" alt="Estrutura do dsh-library: uma barra central com o domínio de armazenamento dsh_library (documents / chunks / purges); a faixa de ingestão, acima, leva um caminho pelo limite de tamanho, pelos chunks de janela deslizante e pelo embedder até esse domínio; a faixa de recuperação, abaixo, coloca a consulta e os chunks desse mesmo domínio em pontuação híbrida, re-rank MMR, filtro de relevância e fixação de início e fim até produzir a página com marcadores [n]; fora da página, duas sondas verificam citações e remoções">
 </picture>
 
+![dsh-library: execução real de terminal](docs/assets/dsh-library-demo.gif)
+
+*Repetição animada de uma execução real registrada neste repositório.*
+
+
 ## Instalação em três passos
 
 1. **Instale** (escolha um canal):
