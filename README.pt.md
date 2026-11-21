@@ -311,7 +311,7 @@ Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `deepseek`, `cordis`, `rag`, `k
 
 ## Família e agradecimentos
 
-Este projeto faz parte da família de plugins de DeepSeek Harness do [PerryLink](https://github.com/PerryLink) (95 plugins, todos Apache-2.0). Se ele for útil, **deixe uma estrela** — nada fica bloqueado por trás disso, mas ajuda a próxima pessoa a encontrá-lo.
+Este projeto faz parte da família de plugins de DeepSeek Harness do [PerryLink](https://github.com/PerryLink) (99 plugins, todos Apache-2.0). Se ele for útil, **deixe uma estrela** — nada fica bloqueado por trás disso, mas ajuda a próxima pessoa a encontrá-lo.
 
 - [@PerryLink](https://github.com/PerryLink) — criador e mantenedor: as oito portas de qualidade, o índice de domínio de armazenamento, o pipeline de recuperação híbrido, a verificação de citações/expurgo e a documentação em cinco idiomas.
 
