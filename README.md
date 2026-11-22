@@ -9,7 +9,9 @@
 
 **把本地 md/txt 文档变成带引用编号、可逐条核验的检索库。**
 
-面向 DeepSeek Harness 的本地文档知识库：按路径导入、滑窗切片、本地嵌入，混合检索返回带 `dsh-v0.2.2-rc.4`（2026-11-18）；`[n]` 标记的结果页，引用和删除都有可验证的落点。
+面向 DeepSeek Harness 的本地文档知识库：按路径导入、滑窗切片、本地嵌入，混合检索返回带、`[n]` 标记的结果页，引用和删除都有可验证的落点。
+
+最近一次核验：DeepSeek Harness `dsh-v0.2.3-alpha.1`（2026-11-22）。
 
 [安装](#三步上手) · [配置](#配置) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 

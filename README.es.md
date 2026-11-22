@@ -9,7 +9,9 @@
 
 **Convierte tus documentos md/txt locales en una biblioteca de recuperación citable y verificable.**
 
-Una base de conocimiento local de documentos para DeepSeek Harness: importa por ruta, trocea con ventana deslizante, incrusta localmente y obtén resultados de búsqueda híbrida cuyas citas `dsh-v0.2.2-rc.4`（2026-11-18）；`[n]` —y cuyas eliminaciones— se pueden comprobar.
+Una base de conocimiento local de documentos para DeepSeek Harness: importa por ruta, trocea con ventana deslizante, incrusta localmente y obtén resultados de búsqueda híbrida cuyas citas, `[n]` —y cuyas eliminaciones— se pueden comprobar.
+
+Última verificación: DeepSeek Harness `dsh-v0.2.3-alpha.1` (2026-11-22).
 
 [Instalar](#instalación-en-tres-pasos) · [Configuración](#configuración) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 
@@ -46,7 +48,6 @@ dsh plugin --profile <name> add dsh-library
 ![dsh-library: ejecución real de terminal](docs/assets/dsh-library-demo.gif)
 
 *Repetición animada de una ejecución real registrada en este repositorio.*
-
 
 ## Instalación en tres pasos
 
