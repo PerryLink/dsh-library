@@ -7,6 +7,8 @@
 
 # dsh-library
 
+Current version `0.3.3`.
+
 **Turn your local md/txt documents into a citable, verifiable retrieval library.**
 
 A local document knowledge base for DeepSeek Harness: import by path, chunk with a sliding window, embed locally, and get hybrid search results whose, `[n]` citations — and deletions — can be checked.
